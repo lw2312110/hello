@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+{% extends "webpart/base/blankBase.html" %}
+{% block head %}
+    <!-- codemirror -->
+    <link href="{{ url_for('static',filename='css/plugins/codemirror/codemirror.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/plugins/codemirror/ambiance.css') }}" rel="stylesheet">
+    <!-- Sweet Alert -->
+    <link href="{{ url_for('static',filename='css/plugins/sweetalert/sweetalert.css') }}" rel="stylesheet">
+{% endblock %}
+{% block pageHeader %}
+    <div class="col-sm-4">
+        <h2>AddMixFunc</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="mix">原子能力列表</a>
+            </li>
+            <li>
+{#                <a href="add">执行处理文件</a>#}
+            </li>
+        </ol>
+    </div>
+
+    <div class="col-sm-8">
+        <div class="title-action">
+            <a id="modify" class="btn btn-primary">修改</a>
+{#            <a id="excute" class="btn btn-primary">循环执行</a>#}
+{#            <a id="excute_one" class="btn btn-primary">一次执行</a>#}
+{#            <a id="removejob" class="btn btn-primary">取消</a>#}
+            <a href="mix" class="btn btn-primary">返回</a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block pageContent %}
+    {#  {% autoescape true %}#}
+    {#    <code >{{ data.dealCode }}</code>#}
+    {#  {% endautoescape  %}#}
+    <div class="ibox ">
+        <div class="ibox-title">
+            <h5 id="code">流程代码</h5>
+        </div>
+        <div class="ibox-content">
+            <textarea id="dealCode" name="editor">{{ data.mixCode }}</textarea>
+        </div>
+    </div>
+{% endblock %}
+{% block pageJs %}
+    <!-- CodeMirror -->
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/codemirror.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/mode/python/python.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/mode/javascript/javascript.js') }}"></script>
+    <!-- Sweet alert -->
+    <script src="{{ url_for('static',filename='js/plugins/sweetalert/sweetalert.min.js') }}"></script>
+{% endblock %}
+{% block pageScript %}
+    <script>
+        var flag = false
+
+        $(document).ready(function () {
+            $.ajax({
+                type: "POST",
+                url: "/dealFile/getJobStatus",
+                async: false,
+                success: function (result) {
+                    var arrays = jQuery.parseJSON(result);
+                    for (var i = 0; i < arrays.length; i++) {
+                        if ("{{ data.id }}" === arrays[i].jobid) {
+                            flag = true
+                            console.log(flag)
+                            $("#code").css("color", "red")
+                        } else {
+                            $("#code").css("color", "black")
+                        }
+                    }
+                },
+                error: function () {
+                    alert('error')
+                }
+            });
+
+            var codeEditor = CodeMirror.fromTextArea(document.getElementById("dealCode"), {
+                mode: {
+                    name: "python",
+                    version: 3,
+                    singleLineStringErrors: false
+                },
+                lineNumbers: true,
+                indentUnit: 4,
+                matchBrackets: true
+            });
+
+
+            $("#modify").on("click", function () {
+                if (flag === false) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/dealFile/modifyMix",
+                        data: {id: "{{ data.id }}", dealCode: codeEditor.getValue()},
+                        async: false,
+                        success: function (result) {
+                            alert(result)
+                        },
+                        error: function () {
+                            alert('error')
+                        }
+                    })
+                } else {
+                    alert('任务正在运行！请取消先取消任务！')
+                }
+            });
+
+            $("#excute").on("click", function () {
+                if (flag === false) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/dealFile/excute",
+                        data: {id: "{{ data.id }}", dealCode: codeEditor.getValue()},
+                        async: false,
+                        success: function (result) {
+                            alert(result)
+                            flag = true
+                            $("#code").css("color", "red")
+
+                        },
+                        error: function () {
+                            alert('error')
+                        }
+                    })
+                } else {
+                    alert('任务已启动，请勿重复操作！')
+                }
+            });
+
+            $("#excute_one").on("click", function () {
+                if (flag === false) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/dealFile/add_job_immediately",
+                        data: {id: "{{ data.id }}", dealCode: codeEditor.getValue()},
+                        async: false,
+                        success: function (result) {
+                            alert(result)
+{#                            flag = true#}
+{#                            $("#code").css("color", "red")#}
+
+                        },
+                        error: function () {
+                            alert('error')
+                        }
+                    })
+                } else {
+                    alert('任务已启动，请勿重复操作！')
+                }
+            });
+
+            $("#removejob").on("click", function () {
+                if (flag === true) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/dealFile/removejob",
+                        data: {id: "{{ data.id }}", dealCode: codeEditor.getValue()},
+                        async: false,
+                        success: function (result) {
+                            alert(result)
+                            flag = false
+                            $("#code").css("color", "black")
+                        },
+                        error: function () {
+                            alert('error')
+                        }
+                    })
+                } else {
+                    alert('任务已取消！请勿重复操作！')
+                }
+            });
+        });
+    </script>
+{% endblock %}

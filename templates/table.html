@@ -1,0 +1,241 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Stict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang = "zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>blog列表</title>
+    <link rel="shortcut icon" href="{{ url_for('static',filename='favicon.ico') }}">
+    <link href="{{ url_for('static',filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/font-awesome.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/animate.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+
+<div class="col-sm-4">
+        <h2>BLOG</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="/table">blog列表</a>
+            </li>
+        </ol>
+    </div>
+    <div class="col-sm-8">
+        <div class="title-action">
+            <a  href="/addtest" class="btn btn-primary btn-add"  >增加blog</a>
+        </div>
+    </div>
+
+<div class="col-sm-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-content">
+                <table class="table table-striped table-bordered table-hover dataTables-example" id="blogTables">
+                    <thead>
+                    <tr>
+                        <th data-field="url">编号</th>
+                        <th data-field="url">标题</th>
+                        <th data-field="url">内容</th>
+                        <th data-field="url">操作</th>
+
+                    </tr>
+                    <tbody>
+                    {% for data in datas %}
+                        <tr>
+                            <td data-field="url" id="blogId">{{ data.id }}</td>
+                            <td data-field="url" id="blogname">{{ data.name }}</td>
+                            <td data-field="url" id="blogcontent">{{ data.content }}</td>
+                            <td>
+                                <div hidden class="bid">{{ data.id }}</div>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a  class="btn btn-primary  btn-xs btn-update" href="/updatetest?id={{ data.id }}">管理</a>
+                                    <a class="btn btn-danger btn-xs btn-del"  >删除</a>
+                                </div>
+                            </td>
+                       <!--  <th><a class="btn btn-danger btn-xs btn-del" data-toggle="modal" data-target="#delCfmModal"
+                             href="/delblog?id=">删除</a></th>
+                        -->
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+<!-- 到时候增加blog做一个modal fade的Modal，然后上面链接到这个框来，这个框由form提交数据-->
+<div class="modal fade" id="delCfmModal">
+    <div class="modal-dialog">
+        <div class="modal-content message_align">
+            <div class="modal-header">
+                <h4 class="modal-title">删除</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span>×</span></button>
+            </div>
+            <div class="modal-body">
+                <p style="color: red;font-weight: bolder">您确认要删除吗？</p>
+            </div>
+            <div class="modal-footer">
+                <input type="hidden" id="url"/>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger modal-btn-del" data-dismiss="modal">确定</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!--
+<div class="modal fade" id="updateBlogModal">
+    <div class="modal-dialog">
+        <div class="modal-content message_align">
+            <div class="modal-header">
+                <h4 class="modal-title">修改blog</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span>×</span></button>
+            </div>
+            <div class="modal-body">
+                 <form action="/updateblog" method="post" id="updateform">
+                <div hidden class="bId" id="bId" name="bId" ></div>
+                <fieldset class="form-group">
+                    <label for="updateBlogName">blog名称</label>
+                    <input name="name" class="form-control" id="updateBlogName"  >
+                </fieldset>
+                <fieldset class="form-group" >
+                    <label for="updatecontent">blog内容</label>
+                    <input name="content"  class="form-control" id="updatecontent" >
+                </fieldset>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="submit" class="btn btn-danger" data-dismiss="modal">确定</button>
+             </form>
+            </div>
+    </div>
+  </div>
+</div>
+
+-->
+<!--
+<div class="modal fade" id="addBlogModal">
+    <div class="modal-dialog">
+        <div class="modal-content message_align">
+            <div class="modal-header">
+                <h4 class="modal-title">添加blog</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span>×</span></button>
+            </div>
+            <div class="modal-body">
+                <form action="/addblog" method="post" >
+                <fieldset class="form-group">
+                    <label for="addBlogName">blog名称</label>
+                    <input name="name" class="form-control" id="addBlogName" required >
+                </fieldset>
+                <fieldset class="form-group" >
+                    <label for="addcontent">blog内容</label>
+                    <input name="content"  class="form-control" id="addcontent" required>
+                </fieldset>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="submit" class="btn btn-danger " data-dismiss="modal">确定</button>
+             </form>
+            </div >
+
+        </div>
+    </div>
+  </div>
+-->
+
+
+<!--
+<div class="container">
+
+        <form action="/addblog" method="post" >
+                <fieldset class="form-group">
+                    <label for="addBlogName">blog名称</label>
+                    <input name="name" class="form-control" id="addBlogName" required >
+                </fieldset>
+                <fieldset class="form-group" >
+                    <label for="addcontent">blog内容</label>
+                    <input name="content"  class="form-control" id="addcontent" required>
+                </fieldset>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="submit" class="btn btn-danger" data-dismiss="modal">确定</button>
+             </form>
+    </div>
+-->
+
+
+<script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
+<script src="{{ url_for('static',filename='js/bootstrap.min.js') }}"></script>
+
+</body>
+
+<script>
+    $(function () {
+
+
+       $(".btn-del").click(function () {
+                var $blogId = $(this).parentsUntil("td").siblings(".bid").html();
+                $('#url').val("/delblog?id=" +$blogId);
+                $('#delCfmModal').modal("show");
+            });
+
+       $(".modal-btn-del").click(function () {
+                window.location.href=$.trim($("#url").val());
+            });
+
+       $("#modify").on("click", function () {
+
+                item = {}
+                item ["id"] = {{ data.id }};
+                item ["dealCode"] = $("#dealCode").text();
+
+                jsonObj.push(item);
+
+                $.ajax({
+                    cache: false,
+                    type: "post",
+                    url: "/dealFile/modify",
+                    data: "",
+                    async: true,
+                    success: function (result) {
+                        alert(jsonObj)
+                    }
+                });
+            });
+
+
+       <!--
+        $(".btn-update").click(function () {
+                var $blogId = $(this).parentsUntil("td").siblings(".bid").html();
+                $('#bId').val($blogId);
+            });
+
+
+           $(".btn-update").click(function () {
+                var $blogId = $(this).parentsUntil("td").siblings(".bid").html();
+                $('#url').val("/updatetest?id=" +$blogId);
+                window.location.href=$.trim($("#url").val());
+            });
+
+          $(".btn-add").click(function () {
+                $('#addBlogModal').modal("show");
+            });
+        -->
+
+
+
+<!--
+  $(".btn-update").click(function () {
+                $('#bId').val($(this).parentsUntil("td").siblings(".bid").html());
+                var $blog = $(this).parentsUntil("tr");
+                $('#updateBlogName').val($blog.siblings(".blogname").html());
+                $('#updatecontent').val($blog.siblings(".blogcontent").html());
+                var $blogId = $(this).parentsUntil("td").siblings(".bid").html();
+                $("#modal-form").attr("action","/updateblog?id=" +$blogId);
+                $('#updateBlogModal').modal("show");
+            });
+ -->
+
+
+
+
+    });
+
+</script>
+
+
+
+</html>

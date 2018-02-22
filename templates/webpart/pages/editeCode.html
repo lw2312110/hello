@@ -1,0 +1,153 @@
+{% extends "webpart/base/blankBase.html" %}
+
+{% block title %}逻辑拖拽编辑{% endblock %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block pageHeader %}
+    <div class="col-sm-4">
+        <h2>AMDO</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="#">逻辑编排</a>
+            </li>
+        </ol>
+    </div>
+    <div class="col-sm-8">
+        <div class="title-action">
+            <a href="/dealFile/editeCode" class="btn btn-primary">刷新</a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block pageContent %}
+    <div class="col-sm-6">
+        <div class="ibox ">
+            <div class="ibox-title">
+                <h5>原子能力</h5>
+            </div>
+            <div class="ibox-content">
+
+                <p class="m-b-lg">
+                    <strong>选中原子能力拖拽到右边</strong>
+                </p>
+
+                <div class="dd" id="nestable">
+
+                </div>
+                <div class="m-t-md">
+                    <h5>数据：</h5>
+                </div>
+                <textarea id="nestable-output" class="form-control"></textarea>
+
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <div class="ibox ">
+            <div class="ibox-title">
+                <h5>逻辑编排</h5>
+            </div>
+            <div class="ibox-content">
+
+                <p class="m-b-lg">
+                    从原子能力拖拽原子功能到这里组合成处理逻辑。
+                </p>
+
+                <div class="dd" id="nestable2">
+
+                </div>
+                <div class="m-t-md">
+                    <h5>数据：</h5>
+                </div>
+                <textarea id="nestable2-output" class="form-control"></textarea>
+            </div>
+
+            <button id="btn-wmm">wmm</button>
+            <button id="nestable-menu">nestable-menu</button>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block pageJs %}
+    <!-- Nestable List -->
+    <script src="{{ url_for('static',filename='js/plugins/nestable/jquery.nestable.js') }}"></script>
+{% endblock %}
+
+{% block pageScript %}
+    <script>
+        $(document).ready(function () {
+
+            var updateOutput = function (e) {
+                var list = e.length ? e : $(e.target),
+                    output = list.data('output');
+                if (window.JSON) {
+                    output.val(window.JSON.stringify(list.nestable('serialize'))); //, null, 2));
+                } else {
+                    output.val('浏览器不支持');
+                }
+                $('#nestable').html("<ol class=\"dd-list\">\n" +
+                    "                        <li class=\"dd-item\" data-id=\"1\">\n" +
+                    "                            <div  class=\"dd-handle\">接收工单数据</div>\n" +
+                    "                        </li>\n" +
+                    "                        <li class=\"dd-item\" data-id=\"2\">\n" +
+                    "                            <div  class=\"dd-handle\">查询端口状态</div>\n" +
+                    "                        </li>\n" +
+                    "                        <li class=\"dd-item\" data-id=\"3\">\n" +
+                    "                            <div class=\"dd-handle\">查询是否单上联</div>\n" +
+                    "                        </li>\n" +
+                    "                        <li class=\"dd-item\" data-id=\"4\">\n" +
+                    "                            <div class=\"dd-handle\">查询误码</div>\n" +
+                    "                        </li>\n" +
+                    "                        <li class=\"dd-item\" data-id=\"5\">\n" +
+                    "                            <div class=\"dd-handle\">测试</div>\n" +
+                    "                        </li>\n" +
+                    "                    </ol>");
+            };
+
+
+            $('#nestable2').html("<ol class=\"dd-list\">\n" +
+                    "                        <li class=\"dd-item\" data-id=\"1\">\n" +
+                    "                            <div  class=\"dd-handle\">接收工单数据</div>\n" +
+                    "                        </li>\n" +
+                    "                    </ol>");
+            // activate Nestable for list 1
+            $('#nestable').nestable({
+                group: 1
+            }).on('change', updateOutput);
+
+            // activate Nestable for list 2
+            $('#nestable2').nestable({
+                group: 1
+            }).on('change', updateOutput);
+
+            // output initial serialised data
+            updateOutput($('#nestable').data('output', $('#nestable-output')));
+            updateOutput($('#nestable2').data('output', $('#nestable2-output')));
+
+            $('#nestable-menu').on('click', function (e) {
+                var target = $(e.target),
+                    action = target.data('action');
+                if (action === 'expand-all') {
+                    $('.dd').nestable('expandAll');
+                }
+                if (action === 'collapse-all') {
+                    $('.dd').nestable('collapseAll');
+                }
+            });
+
+
+            $('#btn-wmm').on('click', function () {
+
+                alert($('.dd').nestable('serialize'))
+
+            })
+
+        });
+    </script>
+
+{% endblock %}

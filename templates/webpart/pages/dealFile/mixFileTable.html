@@ -1,0 +1,90 @@
+{% extends "webpart/base/blankBase.html" %}
+{% block pageHeader %}
+    <div class="col-sm-4">
+        <h2>MixFunc</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="mix">原子能力列表</a>
+            </li>
+        </ol>
+    </div>
+    <div class="col-sm-8">
+        <div class="title-action">
+            <a href="addMix" class="btn btn-primary">增加原子能力</a>
+        </div>
+    </div>
+{% endblock %}
+{% block pageContent %}
+
+    <div class="col-sm-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-content">
+                <table class="table table-striped table-bordered table-hover dataTables-example">
+                    <thead>
+                    <tr>
+                        <th data-field="url">序号</th>
+                        <th data-field="url">原子能力英文名</th>
+                        <th data-field="url">原子能力中文名</th>
+                        <th data-field="url">原子能力中文描述</th>
+                        <th data-field="url">原子能力包位置</th>
+                        <th data-field="url">入参</th>
+                        <th data-field="url">出参</th>
+                        <th data-field="url">查看原子能力</th>
+                        <th data-field="url">删除原子能力</th>
+                    </tr>
+                    <tbody>
+                    {% for data in datas %}
+                        <tr>
+                            <th data-field="url">{{ data.id }}</th>
+                            <th data-field="url">{{ data.methodName }}</th>
+                            <th data-field="url">{{ data.methodTitle }}</th>
+                            <th data-field="url">{{ data.methodDesc }}</th>
+                            <th data-field="url">{{ data.classImport }}</th>
+                            <th data-field="url">{{ data.input }}</th>
+                            <th data-field="url">{{ data.output }}</th>
+                            <th><a class="btn btn-primary  btn-xs" href="manageMix?id={{ data.id }}">管理</a></th>
+                            <th><a class="btn btn-danger btn-xs" href="deleteMix?id={{ data.id }}">删除</a></th>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block pageScript %}
+    <script src="{{ url_for('static',filename='js/jquery.min.js?v=2.1.4') }}"></script>
+    <script src="{{ url_for('static',filename='js/bootstrap.min.js?v=3.3.6') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/jeditable/jquery.jeditable.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/dataTables/jquery.dataTables.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/dataTables/dataTables.bootstrap.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/content.js?v=1.0.0') }}"></script>
+
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                type: "POST",
+                url: "/dealFile/getJobStatus",
+                async: false,
+                success: function (result) {
+                    var arrays = jQuery.parseJSON(result);
+                    for (var i = 0; i < arrays.length; i++) {
+{#                        console.log($("th").text())#}
+{#                        console.log(arrays[i].jobid)#}
+                        $("th").each(function () {
+                            if( $(this).text() == arrays[i].jobid ){
+                                 $(this).css("color", "red")
+                            }
+                        });
+                    }
+                },
+                error: function () {
+                    alert('error')
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+

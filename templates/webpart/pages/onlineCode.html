@@ -1,0 +1,162 @@
+{% extends "webpart/base/blankBase.html" %}
+
+{% block title %}代码编辑器{% endblock %}
+
+{% block head %}
+    <!-- codemirror -->
+    <link href="{{ url_for('static',filename='css/plugins/codemirror/codemirror.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/plugins/codemirror/ambiance.css') }}" rel="stylesheet">
+    <!-- Sweet Alert -->
+    <link href="{{ url_for('static',filename='css/plugins/sweetalert/sweetalert.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block pageHeader %}
+    <div class="col-sm-4">
+        <h2>AMDO</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="#">代码编辑</a>
+            </li>
+        </ol>
+    </div>
+    <div class="col-sm-8">
+        <div class="title-action">
+            <a href="/page/onlinecode" class="btn btn-primary">刷新</a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block pageContent %}
+    <div class="col-sm-12">
+        <div class="col-sm-8">
+            <div class="ibox ">
+                <div class="ibox-title">
+                    <h5>代码编辑</h5>
+                    <div id="executeDiv">
+                        <a id="execute" class="pull-right" href="#" style="color: #1ab394;">
+                            <i class="fa fa-sign-in" style="color: #1ab394;"></i>运行
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <textarea id="code1" name="code1"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="ibox ">
+                <div class="ibox-title">
+                    <h5>运行结果</h5>
+                </div>
+                <div class="ibox-content">
+                    <textarea id="code2" name="code2"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block pageJs %}
+    <!-- CodeMirror -->
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/codemirror.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/mode/python/python.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/mode/javascript/javascript.js') }}"></script>
+    <!-- Sweet alert -->
+    <script src="{{ url_for('static',filename='js/plugins/sweetalert/sweetalert.min.js') }}"></script>
+{% endblock %}
+
+{% block pageScript %}
+    <script>
+        $(document).ready(function () {
+            var codeEditor = CodeMirror.fromTextArea(document.getElementById("code1"), {
+                mode: {
+                    name: "python",
+                    version: 3,
+                    singleLineStringErrors: false
+                },
+                lineNumbers: true,
+                indentUnit: 4,
+                matchBrackets: true
+            });
+
+            var compileResult = CodeMirror.fromTextArea(document.getElementById("code2"), {
+                lineNumbers: true,
+                matchBrackets: true,
+                styleActiveLine: true
+            });
+
+            // 编译
+            $("#executeDiv").on('click', '#execute', function () {
+
+                var code1 = codeEditor.getValue();
+                if (code1 != '') {
+
+                    $("#executeDiv").empty();
+                    $("#executeDiv").append(getDisabledExecuteDiv());
+
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/code/run",
+                        data: {code: code1},// 要提交的表单
+                        success: function (msg) {
+
+                            compileResult.setValue(msg);
+
+                            $("#executeDiv").empty();
+                            $("#executeDiv").append(getAbleExecuteDiv());
+                        },
+                        error: function () {
+                            swal({
+                                title: "提示",
+                                text: "出错了！！",
+                                type: "error",
+                                confirmButtonColor: "#DD6B55",
+                                confirmButtonText: "确定",
+                                closeOnConfirm: true
+                            });
+
+                            $("#executeDiv").empty();
+                            $("#executeDiv").append(getAbleExecuteDiv());
+                        }
+                    });
+                } else {
+                    swal({
+                        title: "提示",
+                        text: "请写代码！！",
+                        type: "warning",
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "确定",
+                        closeOnConfirm: true
+                    });
+                }
+            });
+
+            function getAbleExecuteDiv() {
+
+                return "<a id=\"execute\" class=\"pull-right\" href=\"#\" style=\"color: #1ab394;\">\n" +
+                    "                                        <i class=\"fa fa-sign-in\" style=\"color: #1ab394;\"></i>运行\n" +
+                    "                                </a>";
+            }
+
+            function getDisabledExecuteDiv() {
+
+                return "<a id='executeWait' class=\"pull-right\" href=\"#\" style=\"color: #1ab394;\">\n" +
+                    "                                        <i class=\"fa fa-spinner fa-spin\" style=\"color: #1ab394;\"></i>编译中...\n" +
+                    "                                </a>";
+            }
+
+            $("#executeDiv").on('click', '#executeWait', function () {
+                console.log("wait");
+                swal({
+                    title: "请稍后",
+                    text: "正在调用接口，请稍后！！",
+                    type: "warning",
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "确定",
+                    closeOnConfirm: true
+                });
+            });
+        });
+    </script>
+{% endblock %}

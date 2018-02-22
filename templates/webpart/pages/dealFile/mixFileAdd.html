@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+{% extends "webpart/base/blankBase.html" %}
+{% block head %}
+    <!-- codemirror -->
+    <link href="{{ url_for('static',filename='css/plugins/codemirror/codemirror.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/plugins/codemirror/ambiance.css') }}" rel="stylesheet">
+    <!-- Sweet Alert -->
+    <link href="{{ url_for('static',filename='css/plugins/sweetalert/sweetalert.css') }}" rel="stylesheet">
+{% endblock %}
+{% block pageHeader %}
+    <div class="col-sm-4">
+        <h2>AddFile</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="mix">原子能力脚本</a>
+            </li>
+            <li>
+                <a href="addMix">增加原子能力</a>
+            </li>
+        </ol>
+    </div>
+    <div class="col-sm-8">
+        <div class="title-action">
+            <a href="mix" class="btn btn-primary">返回</a>
+        </div>
+    </div>
+{% endblock %}
+{% block pageContent %}
+    <form class="form-horizontal" action="addCodeMix" method="post">
+        <div class="col-sm-12">
+            <div class="col-sm-4">
+                <div class="ibox ">
+
+                    <p>创建原子能力</p>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">原子能力英文名</label>
+
+                        <div class="col-sm-8">
+                            <input type="text" id="methodName" name="methodName" placeholder="原子能力英文名"
+                                   class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">原子能力中文名</label>
+
+                        <div class="col-sm-8">
+                            <input type="text" id="methodTitle" name="methodTitle" placeholder="原子能力中文名"
+                                   class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">原子能力中文描述</label>
+                        <div class="col-sm-8">
+                            <input type="text" id="methodDesc" name="methodDesc" placeholder="原子能力中文描述"
+                                   class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">原子能力包位置</label>
+
+                        <div class="col-sm-8">
+                            <input type="text" id="classImport" name="classImport" placeholder="原子能力包位置"
+                                   class="form-control"> <span class="help-block m-b-none"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">入参</label>
+
+                        <div class="col-sm-8">
+                            <input type="text" id="input" name="input" placeholder="入参"
+                                   class="form-control"> <span class="help-block m-b-none"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">出参</label>
+
+                        <div class="col-sm-8">
+                            <input type="text" id="output" name="output"
+                                   placeholder="出参"
+                                   class="form-control"> <span class="help-block m-b-none"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-sm-offset-3 col-sm-8">
+                            <button class="btn btn-sm btn-white" type="submit">增加</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-8">
+                <div class="ibox ">
+                    <div class="ibox-title">
+                        <h5>原子能力代码编辑</h5>
+
+                    </div>
+                    <div class="ibox-content">
+                        <textarea id="mixCode" name="mixCode"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+{% block pageJs %}
+    <!-- CodeMirror -->
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/codemirror.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/mode/python/python.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/mode/javascript/javascript.js') }}"></script>
+    <!-- Sweet alert -->
+    <script src="{{ url_for('static',filename='js/plugins/sweetalert/sweetalert.min.js') }}"></script>
+{% endblock %}
+{% block pageScript %}
+    <script>
+        $(document).ready(function () {
+            var codeEditor = CodeMirror.fromTextArea(document.getElementById("mixCode"), {
+                mode: {
+                    name: "python",
+                    version: 3,
+                    singleLineStringErrors: false
+                },
+                lineNumbers: true,
+                indentUnit: 4,
+                matchBrackets: true
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+{% extends "webpart/base/blankBase.html" %}
+{% block head %}
+    <!-- codemirror -->
+    <link href="{{ url_for('static',filename='css/plugins/codemirror/codemirror.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/plugins/codemirror/ambiance.css') }}" rel="stylesheet">
+    <!-- Sweet Alert -->
+    <link href="{{ url_for('static',filename='css/plugins/sweetalert/sweetalert.css') }}" rel="stylesheet">
+    <!-- Toastr -->
+    <link href="{{ url_for('static',filename='css/plugins/toastr/toastr.min.css') }}" rel="stylesheet">
+{% endblock %}
+{% block pageHeader %}
+    <div class="col-sm-4">
+        <h2>AddFile</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="table">处理流程脚本</a>
+            </li>
+            <li>
+                <a href="add">执行处理文件</a>
+            </li>
+        </ol>
+    </div>
+
+
+{% endblock %}
+
+{% block pageContent %}
+    {#  {% autoescape true %}#}
+    {#    <code >{{ data.dealCode }}</code>#}
+    {#  {% endautoescape  %}#}
+    <div class="ibox ">
+        <div class="ibox-title">
+            <h5 id="code">流程代码</h5>
+        </div>
+        <div class="ibox-content">
+            <textarea id="dealCode" name="editor">{{ data.dealCode }}</textarea>
+        </div>
+    </div>
+     <div class="col-sm-0">
+        <div class="title-action">
+            <a id="modify" class="btn btn-primary">修改</a>
+            <a id="excute" class="btn btn-primary">循环执行</a>
+{#            <a id="excute_one" class="btn btn-primary">一次执行</a>#}
+            <a id="removejob" class="btn btn-primary">取消</a>
+            <a href="table" class="btn btn-primary">返回</a>
+        </div>
+    </div>
+{% endblock %}
+{% block pageJs %}
+    <!-- CodeMirror -->
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/codemirror.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/mode/python/python.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/mode/javascript/javascript.js') }}"></script>
+    <!-- Sweet alert -->
+    <script src="{{ url_for('static',filename='js/plugins/sweetalert/sweetalert.min.js') }}"></script>
+     <!-- Toastr script -->
+    <script src="{{ url_for('static',filename='js/plugins/toastr/toastr.min.js') }}"></script>
+{% endblock %}
+{% block pageScript %}
+    <script>
+        var flag = false
+
+        $(document).ready(function () {
+            $.ajax({
+                type: "POST",
+                url: "/dealFile/getJobStatus",
+                async: false,
+                success: function (result) {
+                    var arrays = jQuery.parseJSON(result);
+                    for (var i = 0; i < arrays.length; i++) {
+                        if ("{{ data.id }}" === arrays[i].jobid) {
+                            flag = true
+                            console.log(flag)
+                            $("#code").css("color", "red")
+                        } else {
+                            $("#code").css("color", "black")
+                        }
+                    }
+                },
+                error: function () {
+{#                    alert('error')#}
+                    toastr.error("程序异常!", "提示");
+                }
+            });
+
+            var codeEditor = CodeMirror.fromTextArea(document.getElementById("dealCode"), {
+                mode: {
+                    name: "python",
+                    version: 3,
+                    singleLineStringErrors: false
+                },
+                lineNumbers: true,
+                indentUnit: 4,
+                matchBrackets: true
+            });
+
+
+            $("#modify").on("click", function () {
+                if (flag === false) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/dealFile/modify",
+                        data: {id: "{{ data.id }}", dealCode: codeEditor.getValue()},
+                        async: false,
+                        success: function (result) {
+{#                            alert(result)#}
+                            toastr.success(result, "提示");
+                        },
+                        error: function () {
+{#                            alert('error')#}
+                            toastr.error("程序异常!", "提示");
+                        }
+                    })
+                } else {
+{#                    alert('任务正在运行！请取消先取消任务！')#}
+                     toastr.warning("任务正在运行！请取消先取消任务！", "提示");
+                }
+            });
+
+            $("#excute").on("click", function () {
+                if (flag === false) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/dealFile/excute",
+                        data: {id: "{{ data.id }}", dealCode: codeEditor.getValue()},
+                        async: false,
+                        success: function (result) {
+{#                            alert(result)#}
+                             toastr.success(result, "提示");
+                            flag = true
+                            $("#code").css("color", "red")
+
+                        },
+                        error: function () {
+{#                            alert('error')#}
+                             toastr.error("程序异常!", "提示");
+                        }
+                    })
+                } else {
+{#                    alert('任务已启动，请勿重复操作！')#}
+                    toastr.warning("任务已启动，请勿重复操作", "提示");
+                }
+            });
+
+            $("#excute_one").on("click", function () {
+                if (flag === false) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/dealFile/add_job_immediately",
+                        data: {id: "{{ data.id }}", dealCode: codeEditor.getValue()},
+                        async: false,
+                        success: function (result) {
+                            toastr.success(result, "提示");
+{#                            flag = true#}
+{#                            $("#code").css("color", "red")#}
+
+                        },
+                        error: function () {
+{#                            alert('error')#}
+                             toastr.error("程序异常!", "提示");
+                        }
+                    })
+                } else {
+{#                    alert('任务已启动，请勿重复操作！')#}
+                    toastr.warning("任务已启动，请勿重复操作", "提示");
+                }
+            });
+
+            $("#removejob").on("click", function () {
+                if (flag === true) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/dealFile/removejob",
+                        data: {id: "{{ data.id }}", dealCode: codeEditor.getValue()},
+                        async: false,
+                        success: function (result) {
+{#                            alert(result)#}
+                            toastr.success(result, "提示");
+                            flag = false
+                            $("#code").css("color", "black")
+                        },
+                        error: function () {
+{#                            alert('error')#}
+                            toastr.success(result, "提示");
+                        }
+                    })
+                } else {
+{#                    alert('任务已取消！请勿重复操作！')#}
+                    toastr.warning("任务已启动，请勿重复操作", "提示");
+                }
+            });
+        });
+    </script>
+{% endblock %}

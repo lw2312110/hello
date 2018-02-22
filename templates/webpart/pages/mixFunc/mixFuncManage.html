@@ -1,0 +1,1240 @@
+{% extends "webpart/base/blankBase.html" %}
+
+{% block title %}原子能力管理{% endblock %}
+
+{% block head %}
+    <!--  jsTree -->
+    <link href="{{ url_for('static',filename='css/plugins/jsTree/style.min.css') }}" rel="stylesheet">
+    <!-- Sweet Alert -->
+    <link href="{{ url_for('static',filename='css/plugins/sweetalert/sweetalert.css') }}" rel="stylesheet">
+    <!-- Toastr -->
+    <link href="{{ url_for('static',filename='css/plugins/toastr/toastr.min.css') }}" rel="stylesheet">
+    <!-- codemirror -->
+    <link href="{{ url_for('static',filename='css/plugins/codemirror/codemirror.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/plugins/codemirror/ambiance.css') }}" rel="stylesheet">
+    <!-- summernote -->
+    <link href="{{ url_for('static',filename='css/plugins/summernote/summernote.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/plugins/summernote/summernote-bs3.css') }}" rel="stylesheet">
+    <!-- Sweet Alert -->
+    <link href="{{ url_for('static',filename='css/plugins/sweetalert/sweetalert.css') }}" rel="stylesheet">
+    <!-- Bootstrap-table -->
+    <link href="{{ url_for('static',filename='css/plugins/bootstrap-table/bootstrap-table.min.css') }}"
+          rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/font-awesome.css') }}" rel="stylesheet">
+{% endblock %}
+{% block pageHeader %}
+    <div class="col-sm-4">
+        <h2>AMDO</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="#">原子能力管理</a>
+            </li>
+        </ol>
+    </div>
+    <div class="col-sm-8">
+        <div class="title-action">
+            <a href="/page/mixfunc" class="btn btn-primary">刷新</a>
+        </div>
+    </div>
+{% endblock %}
+{% block pageContent %}
+    <div class="col-sm-3">
+        <div class="ibox float-e-margins">
+            <div class="ibox-content">
+                <div class="file-manager">
+
+                    <div class="hr-line-dashed"></div>
+                    <button id="introduce" type="button" class="btn btn-primary btn-block col-xs-4"
+                            data-toggle="modal" data-target="#mixFuncIntroduce">
+                        原子能力管理说明
+                    </button>
+                    <div class="modal inmodal fade" id="mixFuncIntroduce" tabindex="-1" role="dialog"
+                         aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal"><span
+                                            aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                                    </button>
+                                    <h4 class="modal-title">原子能力管理</h4>
+                                    <small class="font-bold">说明</small>
+                                </div>
+                                <div class="modal-body">
+                                    <p>
+                                        <strong>mixFunc</strong>
+                                        这里是说明内容
+                                    </p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal">关闭
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <h5>原子能力包</h5>
+                    <div id="folders"></div>
+                    <h5 class="tag-title">操作</h5>
+                    <ul class="tag-list" style="padding: 0">
+                        {#                        详情按钮#}
+                        <li><a id="detail" class="btn btn-primary btn-block">详情</a></li>
+                        {#                        删除按钮#}
+                        <li><a id="remove" class="btn btn-primary btn-block">删除</a></li>
+                        {#                        新建包按钮#}
+                        <li><a id="addPackage" class="btn btn-primary btn-block">新建包</a></li>
+                        {#                        新建文件按钮#}
+                        <li><a id="addFile" class="btn btn-primary btn-block">新建文件</a></li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-9 animated fadeInRight">
+
+        {#添加包，包详情页面#}
+        <div class="row" id="newPackage" style="display:none;">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5 id="newPackageHead">新建包</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="fa fa-wrench"></i>
+                        </a>
+                        <a class="close-link">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form id="newPackageForm">
+                        <div id="detailPackageUserTime" style="display: none;">
+                            <div class="form-group col-xs-6">
+                                <label>创建、修改人</label><br>
+                                <a id="packageUser" href="#" data-toggle="modal" data-target="#userModel"></a>
+                            </div>
+                            <div class="form-group col-xs-6">
+                                <label>创建、修改时间</label>
+                                <input type="text" readonly="true" id="packageTime"
+                                       class="form-control">
+                            </div>
+                        </div>
+                        <div id="form-group-packageName" class="form-group col-xs-6">
+                            <label>引用包名</label>
+                            <input type="text" id="packageName" name="packageName"
+                                   placeholder="请输入引用包名（用于代码调用，只能是字母组合）"
+                                   class="form-control">
+                            <span id="form-group-packageName-help"
+                                  class="help-block m-b-none">引用包名，用于代码调用，只能是字母组合。</span>
+                        </div>
+                        <div id="form-group-packageTitle" class="form-group col-xs-6">
+                            <label>包名</label>
+                            <input type="text" id="packageTitle" name="packageTitle"
+                                   placeholder="请输包名（汉字）"
+                                   class="form-control">
+                            <span id="form-group-packageTitle-help"
+                                  class="help-block m-b-none">中文包名，方便识别。</span>
+                        </div>
+                        <div id="form-group-packageSystem" class="form-group col-xs-6">
+                            <label>提供接口系统</label>
+                            <input type="text" id="systemName" name="systemName"
+                                   placeholder="请输提供接口系统名称"
+                                   class="form-control">
+                            <span id="form-group-packageTitle-help"
+                                  class="help-block m-b-none">提供接口的系统名称</span>
+                        </div>
+                        <div class="form-froup col-xs-12">
+                            <label>文件说明</label>
+                            <input type="hidden" id="packageDesc" name="packageDesc" placeholder="方法文件描述信息"
+                                   class="form-control">
+                            <div class="summernote-packageDesc">
+                                <h2>xxxx 包详细说明</h2>
+                                <p>说明内容。。。。</p>
+                                <p>
+                                    <b>当前版本：</b>v4.1.0
+                                </p>
+                                <p>
+                                    <b>时间：</b><span class="label label-warning">2017-11-20 14:55:57</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-sm-offset-5" style="margin-top: 10px;">
+                            <input type="hidden" id="packageId" name="packageId">
+                            <button id="newPackage-post" btntype="new" class="btn btn-primary btn-outline"
+                                    type="button">
+                                <i class="fa fa-check"></i>保存
+                            </button>
+                        </div>
+                        <div class="clearfix"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {#        新建方法文件，方法文件详情#}
+        <div class="row" id="newMethodFile" style="display:none;">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5 id="newMethodFileHead"></h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="fa fa-wrench"></i>
+                        </a>
+                        <a class="close-link">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <form id="newMethodFileForm">
+                        <div id="detailMethodFileUserTime">
+                            <div class="form-group col-xs-6">
+                                <label>创建、修改人</label><br>
+                                <a id="methodFileUser" href="#" data-toggle="modal" data-target="#userModel"></a>
+                            </div>
+                            <div class="form-group col-xs-6">
+                                <label>创建、修改时间</label>
+                                <input type="text" readonly="true" id="methodFileTime" class="form-control">
+                            </div>
+                        </div>
+                        <div id="newMethodFile-step-1" style="display: block;">
+                            <div id="methodFilePackageInfo">
+                                <div class="form-group col-xs-6">
+                                    <label>包ID</label>
+                                    <input type="text" readonly="true" id="methodPackageId" name="packageId"
+                                           class="form-control">
+                                </div>
+                                <div class="form-group col-xs-6">
+                                    <label>引用包名</label>
+                                    <input type="text" readonly="true" id="methodPackageName" name="packageName"
+                                           class="form-control">
+                                </div>
+                            </div>
+                            <div id="form-group-methodFileName" class="form-group col-xs-6">
+                                <label>引用文件名</label>
+                                <input type="text" id="methodFileName" name="methodFileName"
+                                       placeholder="请输入引用文件名（用于代码调用，只能是字母组合）" class="form-control">
+                                <span id="form-group-methodFileName-help" class="help-block m-b-none">
+                                    引用文件名，用于代码调用，只能是字母组合。
+                                </span>
+                            </div>
+                            <div id="form-group-methodFileTitle" class="form-group col-xs-6">
+                                <label>文件名</label>
+                                <input type="text" id="methodFileTitle" name="methodFileTitle"
+                                       placeholder="请输入文件名（汉字）" class="form-control">
+                                <span id="form-group-methodFileTitle-help" class="help-block m-b-none">
+                                    中文文件名，方便识别。
+                                </span>
+                            </div>
+                            <div class="form-froup col-xs-12">
+                                <label>文件说明</label>
+                                <input type="hidden" id="methodFileDesc" name="methodFileDesc" placeholder="方法文件描述信息"
+                                       class="form-control">
+                                <div class="summernote-methodFileDesc">
+                                    <h2>xxxx 方法文件详细说明</h2>
+                                    <p>说明内容。。。。说明内容。。。。</p>
+                                    <p>
+                                        <b>当前版本：</b>v4.1.0
+                                    </p>
+                                    <p>
+                                        <b>时间：</b><span class="label label-warning">2017-11-20 14:55:57</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="newMethodFile-step-2" style="display: none;">
+                            <div class="form-froup col-xs-12">
+                                <label>初始代码编辑(<span
+                                        style="color:red;">1、点击空白区域即可刷新、查看初始化代码；2、修改引用文件名后代码会被初始化。</span>)</label>
+                                <textarea id="fileInitCode"></textarea>
+                                <input type="hidden" id="methodFileCode" name="methodFileCode" value="">
+                            </div>
+                        </div>
+
+
+                        <div class="col-sm-12 col-sm-offset-4" style="margin-top: 10px;">
+                            <input type="hidden" id="methodFileId" name="methodFileId">
+                            <button id="methodFileEdit-searchMethod" data-toggle="modal" data-target="#searchMethod"
+                                    class="btn btn-primary btn-outline" type="button">
+                                <i class="fa fa-search"></i>查看方法
+                            </button>
+                            <div class="modal inmodal fade" id="searchMethod" tabindex="-1" role="dialog"
+                                 aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal"><span
+                                                    aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                                            </button>
+                                            <h4 class="modal-title">所有方法</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Example Events -->
+                                            <div class="example-wrap">
+                                                <input class="hidden" value="null" id="isNullTable">
+                                                <div class="example">
+                                                    <div class="alert alert-success" id="tableEventsResult"
+                                                         role="alert">
+                                                        事件结果
+                                                    </div>
+                                                    <div class="btn-group hidden-xs" id="tableEventsToolbar"
+                                                         role="group">
+                                                        <button type="button" id="methodModify" methodid=""
+                                                                class="methodActBtn btn btn-outline btn-default">
+                                                            <i class="fa fa-pencil" aria-hidden="true"></i>
+                                                        </button>
+                                                        <button type="button" id="methodDetail" methodid=""
+                                                                class="methodActBtn btn btn-outline btn-default">
+                                                            <i class="fa fa-search" aria-hidden="true"></i>
+                                                        </button>
+                                                        <button type="button" id="methodDelete" methodid=""
+                                                                class="methodActBtn btn btn-outline btn-default">
+                                                            <i class="fa fa-trash" aria-hidden="true"></i>
+                                                        </button>
+                                                    </div>
+                                                    <table id="tableEvents" data-height="320"
+                                                           data-mobile-responsive="true">
+                                                        <thead>
+                                                        <tr>
+                                                            <th data-field="id"
+                                                                data-checkbox="true"></th>
+                                                            <th data-field="_id.$oid">ID</th>
+                                                            <th data-field="methodName">方法名</th>
+                                                            <th data-field="methodTitle">方法名称</th>
+                                                        </tr>
+                                                        </thead>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <!-- End Example Events -->
+                                        </div>
+                                        <div class="modal-footer">
+                                            <a id="addMethodBtn" target="_blank" href="/page/mixfunc/makeup?act=new"
+                                               type="button"
+                                               class="btn btn-white">添加方法</a>
+                                            <button type="button" class="btn btn-primary" data-dismiss="modal">
+                                                关闭
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button id="methodFileEdit-change" btntype="new" step="1"
+                                    class="btn btn-primary btn-outline" type="button">
+                                <i class="fa fa-pencil"></i>编辑初始化代码
+                            </button>
+                            <button id="newMethodFile-post" btntype="new" class="btn btn-primary btn-outline"
+                                    type="button">
+                                <i class="fa fa-check"></i>保存
+                            </button>
+                        </div>
+                        <div class="clearfix"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    {#user model#}
+    <div class="modal inmodal fade" id="userModel" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content" style="width:300px;">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span
+                            aria-hidden="true">&times;</span><span
+                            class="sr-only">Close</span></button>
+                    <h4 class="modal-title">用户详情</h4>
+                </div>
+                <div class="modal-body">
+                    <h3><strong id="userName">奔波儿灞</strong></h3>
+                    <address>
+                        <strong id="userJob">Baidu, Inc.</strong><br>
+                        <span id="userEmail">邮箱:xxx@baidu.com</span><br>
+                        <span id="userPhone"><addr title="Phone">手机:</addr>18081002339</span><br>
+                        <span id="userTel"><abbr title="Phone">座机:</abbr> (123) 456-7890</span><br>
+                    </address>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop in"></div>
+{% endblock %}
+
+{% block pageJs %}
+    <!-- jsTree plugin javascript -->
+    <script src="{{ url_for('static',filename='js/plugins/jsTree/jstree.min.js') }}"></script>
+    <!-- CodeMirror -->
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/codemirror.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/mode/python/python.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/mode/javascript/javascript.js') }}"></script>
+    <!-- Jquery Validate -->
+    <script src="{{ url_for('static',filename='js/plugins/validate/jquery.validate.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/validate/messages_zh.min.js') }}"></script>
+    <!-- SUMMERNOTE -->
+    <script src="{{ url_for('static',filename='js/plugins/summernote/summernote.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/summernote/summernote-zh-CN.js') }}"></script>
+    <!-- Sweet alert -->
+    <script src="{{ url_for('static',filename='js/plugins/sweetalert/sweetalert.min.js') }}"></script>
+    <!-- Toastr script -->
+    <script src="{{ url_for('static',filename='js/plugins/toastr/toastr.min.js') }}"></script>
+    <!-- Bootstrap table -->
+    <script src="{{ url_for('static',filename='js/plugins/bootstrap-table/bootstrap-table.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/bootstrap-table/bootstrap-table-mobile.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/bootstrap-table/locale/bootstrap-table-zh-CN.min.js') }}"></script>
+{% endblock %}
+{% block pageScript %}
+    <script>
+        $(document).ready(function () {
+            //tree初始化
+            jstreeInit();
+            // 新方法文件代码框
+            var methodFileCode = CodeMirror.fromTextArea(document.getElementById("fileInitCode"), {
+                mode: {
+                    name: "python",
+                    version: 3,
+                    singleLineStringErrors: true
+                },
+                lineNumbers: true,
+                indentUnit: 4,
+                matchBrackets: true
+            });
+            $('.summernote-packageDesc').summernote({
+                lang: 'zh-CN'
+            });
+            $('.summernote-methodFileDesc').summernote({
+                lang: 'zh-CN'
+            });
+
+            //点击tree触发的事件
+            //显示or隐藏菜单按钮及改变按钮属性
+            $('#folders').on("changed.jstree", function (e, data) {
+                var node = data.instance.get_node(data.selected);
+                var id = node.id;
+                var text = node.text;
+                var type = node.icon == 'fa fa-folder' ? "mixFunc" : node.icon == 'fa fa-file-zip-o (alias)' ? "package" : "file";
+
+                //显示or隐藏
+                if (type == "mixFunc") {
+                    $("#detail").attr("style", "display:none;");
+                    $("#remove").attr("style", "display:none;");
+                    $("#addFile").attr("style", "display:none;");
+                }
+                if (type == "package" || type == "file") {
+                    $("#detail").attr("style", "display:block;");
+                    $("#remove").attr("style", "display:block;");
+                    if (type == 'file')
+                        $("#addFile").attr("style", "display:none;");
+                    else
+                        $("#addFile").attr("style", "display:block;");
+                }
+
+                //按钮属性
+                $("#detail").attr("myid", id);
+                $("#detail").attr("text", text);
+                $("#detail").attr("type", type);
+
+                $("#rename").attr("myid", id);
+                $("#rename").attr("text", text);
+                $("#rename").attr("type", type);
+
+                $("#addPacage").attr("myid", id);
+                $("#addPacage").attr("text", text);
+                $("#addPacage").attr("type", type);
+
+                $("#addFile").attr("myid", id);
+                $("#addFile").attr("text", text);
+                $("#addFile").attr("type", type);
+
+                $("#remove").attr("myid", id);
+                $("#remove").attr("text", text);
+                $("#remove").attr("type", type);
+
+                $("#methodFileId").val(id);
+            });
+
+            // 获取详情（package、file）
+            $("#detail").on("click", function () {
+                var type = $(this).attr("type");
+                if (type == "package") {
+                    $("#newMethodFile").attr("style", "display:none");
+                    $("#newPackage").attr("style", "display:none");
+                    $("#newPackage-post").attr('btntype', 'modify');
+                    $("#newPackage-post").html('<i class="fa fa-check"></i>保存修改');
+
+                    $.ajax({
+                        cache: false,
+                        type: "post",
+                        url: "/mixfunc/package/detail",
+                        data: "id=" + $(this).attr("myid"),
+                        async: true,
+                        success: function (result) {
+
+                            var obj = jQuery.parseJSON(result);
+                            if (obj.resultCode == 1) {
+
+                                toastr.success("查询详细信息成功!", "成功");
+                                var detail = jQuery.parseJSON(obj.resultDetail);
+                                $("#newPackage").attr("style", "display:block;");
+
+                                // 创建人及创建时间
+                                $("#detailPackageUserTime").attr('style', 'display:block;');
+                                $.ajax({
+                                    cache: false,
+                                    type: 'post',
+                                    url: '/userData/detail',
+                                    data: "id=" + detail.createUser.$oid,
+                                    async: true,
+                                    success: function (result) {
+                                        var userObj = jQuery.parseJSON(result);
+                                        if (userObj.resultCode == 1) {
+                                            var userDetail = jQuery.parseJSON(userObj.resultDetail);
+                                            $("#packageUser").html(userDetail.userName);
+                                            $("#userName").html(userDetail.userName);
+                                            $("#userJob").html(userDetail.company + "，" + userDetail.part);
+                                            $("#userEmail").html("邮箱：" + userDetail.email);
+                                            $("#userPhone").html("<addr title=\"Phone\">手机：</addr>" + userDetail.phone);
+                                            $("#userTel").html("<addr title=\"Phone\">座机：</addr>" + userDetail.tel);
+                                        } else {
+                                            toastr.warning(userObj.resultDesc, "提示");
+                                        }
+                                    },
+                                    error: function () {
+                                        toastr.error("查询用户信息程序异常!", "提示");
+                                    }
+                                })
+                                $("#packageTime").val(getMyDate(detail.createTime.$date));
+
+                                $("#packageId").val(detail._id.$oid);
+                                $("#newPackageHead").html("包：" + detail.packageName + "（" + detail.packageTitle + "）" + "- 详细信息");
+                                $("#packageName").val(detail.packageName);
+                                $("#packageTitle").val(detail.packageTitle);
+                                $("#systemName").val(detail.systemName);
+                                $('#summernote-packageDesc').code(detail.packageDesc);
+                                $(".note-editable").html(detail.packageDesc);
+                            } else {
+                                toastr.warning(obj.resultDesc, "提示");
+                            }
+                        },
+                        error: function () {
+                            toastr.error("查询详情程序异常!", "提示");
+                        }
+                    })
+                } else if (type == "file") {
+
+                    $("#newMethodFile").attr("style", "display:none");
+                    $("#newPackage").attr("style", "display:none");
+                    $("#newMethodFile-post").attr("btntype", "modify");
+                    $("#methodFileEdit-change").attr("btntype", "detail");
+                    $("#newMethodFile-post").html("<i class=\"fa fa-check\"></i>保存修改");
+
+                    $.ajax({
+                        cache: false,
+                        type: "post",
+                        url: "/mixfunc/methodfile/detail",
+                        data: "id=" + $(this).attr("myid"),
+                        async: true,
+                        success: function (result) {
+
+                            var obj = jQuery.parseJSON(result);
+                            if (obj.resultCode == 1) {
+
+                                toastr.success("查询详细信息成功!", "成功");
+                                var detail = jQuery.parseJSON(obj.resultDetail);
+                                $("#newMethodFile").attr("style", "display:block;");
+
+                                // 创建人及创建时间
+                                $("#detailMethodFileUserTime").attr('style', 'display:block;');
+                                $.ajax({
+                                    cache: false,
+                                    type: 'post',
+                                    url: '/userData/detail',
+                                    data: "id=" + detail.createUser.$oid,
+                                    async: true,
+                                    success: function (result) {
+                                        var userObj = jQuery.parseJSON(result);
+                                        if (userObj.resultCode == 1) {
+                                            var userDetail = jQuery.parseJSON(userObj.resultDetail);
+                                            $("#methodFileUser").html(userDetail.userName);
+                                            $("#userName").html(userDetail.userName);
+                                            $("#userJob").html(userDetail.company + "，" + userDetail.part);
+                                            $("#userEmail").html("邮箱：" + userDetail.email);
+                                            $("#userPhone").html("<addr title=\"Phone\">手机：</addr>" + userDetail.phone);
+                                            $("#userTel").html("<addr title=\"Phone\">座机：</addr>" + userDetail.tel);
+                                        } else {
+                                            toastr.warning(userObj.resultDesc, "提示");
+                                        }
+                                    },
+                                    error: function () {
+                                        toastr.error("查询用户信息程序异常!", "提示");
+                                    }
+                                })
+                                $("#methodFileTime").val(getMyDate(detail.createTime.$date));
+
+                                $("#methodFileId").val(detail._id.$oid);
+                                $("#methodFilePackageInfo").attr("style", "display:none;");
+                                $("#newMethodFileHead").html("文件：" + detail.fileName + "(" + detail.fileTitle + ") -详细信息");
+                                $("#methodFileName").val(detail.fileName);
+                                $("#methodFileTitle").val(detail.fileTitle);
+
+                                var packageid = detail.package.$oid;
+                                $("#methodPackageId").attr("value", packageid);
+
+                                $(".summernote-methodFileDesc").code(detail.fileDesc);
+                                $(".note-editable").html(detail.fileDesc);
+                                methodFileCode.setValue(detail.initCode);
+                            } else {
+                                toastr.warning(obj.resultDesc, "提示");
+                            }
+                        },
+                        error: function () {
+                            toastr.error("程序异常!", "提示");
+                        }
+                    })
+                }
+            });
+
+            // 新建文件页面
+            $("#addFile").on("click", function () {
+
+                //重置新建访问表单
+                $("#newMethodFileForm")[0].reset();
+
+                // 获取id，写入表单隐藏控件
+                var packageId = $(this).attr('myid');
+                $("#methodPackageId").attr("value", packageId);
+                $("#methodFileEdit-change").attr("btntype", "new");
+                // 获取packageName，写入表单隐藏控件
+                var packageName = $(this).attr('text').split('(')[0];
+                $("#methodPackageName").attr("value", packageName);
+
+                //标题
+                $("#newMethodFileHead").html("<span style='color:red;'>" + $(this).attr('text') + "</span> 添加新方法文件");
+
+                //显示新建方法div，隐藏包、文件详情页面
+                $("#newPackage").attr("style", "display:none;");
+                $("#newMethodFile").attr("style", "display:block");
+                $("#detailMethodFileUserTime").attr("style", "display:none;");
+
+                // 设置初始代码
+                methodFileCode.setValue(
+                   "# -*- coding:utf-8 -*-\n\n" +
+
+                    "# import area start\n" +
+                    "from suds.client import Client\n" +
+                    "from suds.xsd.doctor import Import, ImportDoctor\n" +
+                    "from myTools.xmlToJson import Xml2Json\n" +
+                    "import httplib\n" +
+                    "from myTools.xmlToJson import Xml2Json\n" +
+                    "# import area end\n\n" +
+
+                    'import sys\n' +
+                    'reload(sys)\n' +
+                    'sys.setdefaultencoding("utf8")\n\n');
+
+
+                var markupStr = "<h2>xxxx 方法文件详细说明</h2>\n" +
+                    "                                <p>说明内容。。。。</p>\n" +
+                    "                                <p>\n" +
+                    "                                    <b>当前版本：</b>v4.1.0\n" +
+                    "                                </p>\n" +
+                    "                                <p>\n" +
+                    "                                    <b>时间：</b><span class=\"label label-warning\">2017-11-20 14:55:57</span>\n" +
+                    "                                </p>";
+                $('.summernote-methodFileDesc').summernote('code', markupStr);
+                $(".note-editable").html(markupStr);
+
+                $("#newMethodFile-post").attr("btntype", "new");
+                $("#newMethodFile-post").html("<i class=\"fa fa-check\"></i>保存");
+
+            });
+
+            // 添加方法文件
+            $("#newMethodFile-post").on("click", function () {
+
+                isTrue = checkFileNameAndFileTitle();
+                if (isTrue) {
+                    var fileInitCode = methodFileCode.getValue();
+                    $("#methodFileCode").attr("value", fileInitCode);
+                    $("#methodFileDesc").attr("value", $('.summernote-methodFileDesc').code());
+
+                    type = $(this).attr('btntype');
+                    console.log("file:" + type);
+                    if (type == 'new')
+                        var post_url = '/mixfunc/methodfile/new';
+                    else
+                        var post_url = '/mixfunc/methodfile/modify';
+
+                    $.ajax({
+                        cache: false,
+                        type: "post",
+                        url: post_url,
+                        data: $("#newMethodFileForm").serialize(),
+                        async: true,
+                        success: function (result) {
+                            result = jQuery.parseJSON(result);
+                            if (result.resultCode == 1) {
+                                toastr.success(result.resultDesc, "成功");
+                            } else {
+                                toastr.warning(result.resultDesc, "提示");
+                            }
+                        },
+                        error: function () {
+                            toastr.error("程序异常!", "提示");
+                        }
+                    })
+                    jstreeInit(); // 刷新jstree
+                }
+                else {
+                    toastr.error("请按提示要求填写!", "提示");
+                }
+            });
+
+            //监听引用文件名的变化
+            $("#methodFileName").change(function () {
+                var methodFileName = $("#methodFileName").val();
+                var methodFileTitle = $("#methodFileTitle").val();
+                methodFileCode.setValue(
+                   "# -*- coding:utf-8 -*-\n\n" +
+
+                    "# import area start\n" +
+                    "from suds.client import Client\n" +
+                    "from suds.xsd.doctor import Import, ImportDoctor\n" +
+                    "from myTools.xmlToJson import Xml2Json\n" +
+                    "import httplib\n" +
+                    "from myTools.xmlToJson import Xml2Json\n" +
+                    "# import area end\n\n" +
+
+                    'import sys\n' +
+                    'reload(sys)\n' +
+                    'sys.setdefaultencoding("utf8")\n\n' +
+                    "class " + methodFileName + "():\n" +
+                    "    '" + methodFileTitle + "'\n" +
+                    "    ");
+                checkFileNameAndFileTitle();
+            });
+
+            //监听文件名的变化
+            $("#methodFileTitle").change(function () {
+                var methodFileName = $("#methodFileName").val();
+                var methodFileTitle = $("#methodFileTitle").val();
+                methodFileCode.setValue(
+                    "# -*- coding:utf-8 -*-\n\n" +
+
+                    "# import area start\n" +
+                    "from suds.client import Client\n" +
+                    "from suds.xsd.doctor import Import, ImportDoctor\n" +
+                    "from myTools.xmlToJson import Xml2Json\n" +
+                    "import httplib\n" +
+                    "from myTools.xmlToJson import Xml2Json\n" +
+                    "# import area end\n\n" +
+
+                    'import sys\n' +
+                    'reload(sys)\n' +
+                    'sys.setdefaultencoding("utf8")\n\n' +
+                    "class " + methodFileName + "():\n" +
+                    "    '" + methodFileTitle + "'\n" +
+                    "    ");
+                checkFileNameAndFileTitle();
+            });
+
+            //判断引用文件名，文件名是否符合规范
+            function checkFileNameAndFileTitle() {
+                var methodFileName = $("#methodFileName").val();
+                var methodFileTitle = $("#methodFileTitle").val();
+
+                fileNameIsTrue = checkFileName(methodFileName);
+                var icon = "<i class='fa fa-times-circle'></i> ";
+
+                //fileName 不为空且全为字母
+                if (!fileNameIsTrue) {
+                    $("#form-group-methodFileName").removeClass("has-success");
+                    $("#form-group-methodFileName").addClass("has-error");
+                    $("#form-group-methodFileName-help").html(icon + "不能为空，且必须是字母组合。");
+                } else {
+                    $("#form-group-methodFileName").removeClass("has-error");
+                    $("#form-group-methodFileName").addClass("has-success");
+                    $("#form-group-methodFileName-help").html("引用文件名，用于代码调用，只能是字母组合。");
+                }
+
+                //fileTitle 不能为空
+                if (methodFileTitle == "") {
+                    $("#form-group-methodFileTitle").removeClass("has-success");
+                    $("#form-group-methodFileTitle").addClass("has-error");
+                    $("#form-group-methodFileTitle-help").html(icon + "不能为空。");
+                } else {
+                    $("#form-group-methodFileTitle").removeClass("has-error");
+                    $("#form-group-methodFileTitle").addClass("has-success");
+                    $("#form-group-methodFileTitle-help").html("中文文件名，方便识别。");
+                }
+
+                //返回结果
+                if (fileNameIsTrue && methodFileTitle != "")
+                    return true;
+                else
+                    return false;
+            }
+
+
+            //监听引用包名的变化
+            $("#packageName").change(function () {
+                checkPackageNameAndFileTitle();
+            });
+
+            //监听包名的变化
+            $("#packageTitle").change(function () {
+                checkPackageNameAndFileTitle();
+            });
+
+            //判断包引用名、名是否符合规范
+            function checkPackageNameAndFileTitle() {
+                var packageName = $("#packageName").val();
+                var packageTitle = $("#packageTitle").val();
+
+                packageNameIsTrue = checkFileName(packageName);
+                var icon = "<i class='fa fa-times-circle'></i> ";
+
+                //packageName 不为空且全为字母
+                if (!packageNameIsTrue) {
+                    $("#form-group-packageName").removeClass("has-success");
+                    $("#form-group-packageName").addClass("has-error");
+                    $("#form-group-packageName-help").html(icon + "不能为空，且必须是字母组合。");
+                } else {
+                    $("#form-group-packageName").removeClass("has-error");
+                    $("#form-group-packageName").addClass("has-success");
+                    $("#form-group-packageName-help").html("引用包名，用于代码调用，只能是字母组合。");
+                }
+
+                //packageTitle 不能为空
+                if (packageTitle == "") {
+                    $("#form-group-packageTitle").removeClass("has-success");
+                    $("#form-group-packageTitle").addClass("has-error");
+                    $("#form-group-packageTitle-help").html(icon + "不能为空。");
+                } else {
+                    $("#form-group-packageTitle").removeClass("has-error");
+                    $("#form-group-packageTitle").addClass("has-success");
+                    $("#form-group-packageTitle-help").html("中文包名，方便识别。");
+                }
+
+                //返回结果
+                if (packageNameIsTrue && packageTitle != "")
+                    return true;
+                else
+                    return false;
+            }
+
+            // 验证是否只为字母
+            function checkFileName(fileName) {//必须为字母
+                var str = fileName;
+                if (str == "") {
+                    return false;
+                } else {
+                    var reg = new RegExp(/^[a-zA-Z]*$/g);
+                    if (reg.test(str)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+
+            // 新方法文件步骤切换
+            $("#methodFileEdit-change").on("click", function () {
+                var btnType = $(this).attr("btntype");
+                var oldStep = $(this).attr('step');
+                $("#newMethodFile-step-" + oldStep).attr("style", "display:none;");
+
+                var newStep = oldStep == '1' ? '2' : '1';
+                $("#newMethodFile-step-" + newStep).attr("style", "display:block;");
+                $(this).attr('step', newStep);
+
+                //查看方法文件详情时
+                if (btnType == "new") {
+                    $("#detailMethodFileUserTime").attr("style", "display:none;");
+                }
+                else {
+                    // 切换时候隐藏或显示创建人及时间信息
+                    if (newStep == '2') {
+                        $("#detailMethodFileUserTime").attr("style", "display:none;");
+                    } else
+                        $("#detailMethodFileUserTime").attr("style", "display:block;");
+                }
+                // 按钮文字切换
+                var btnText = oldStep == '1' ? '编辑基本信息' : '编辑初始化代码';
+                $(this).html("<i class=\"fa fa-pencil\"></i>" + btnText);
+            });
+
+            // 添加包界面
+            $("#addPackage").on("click", function () {
+                $("#newPackage").attr("style", 'display:block;');
+                $("#newMethodFile").attr("style", "display:none;");
+                $("#detailPackageUserTime").attr("style", "display:none;");
+                $('#newPackageForm')[0].reset();
+                $("#newPackageHead").html("添加包");
+
+                var markupStr = "<h2>xxxx 包详细说明</h2>\n" +
+                    "                                <p>说明内容。。。。</p>\n" +
+                    "                                <p>\n" +
+                    "                                    <b>当前版本：</b>v4.1.0\n" +
+                    "                                </p>\n" +
+                    "                                <p>\n" +
+                    "                                    <b>时间：</b><span class=\"label label-warning\">2017-11-20 14:55:57</span>\n" +
+                    "                                </p>";
+                $('.summernote-packageDesc').summernote('code', markupStr);
+                $(".note-editable").html(markupStr);
+
+                $("#newPackage-post").attr("btntype", 'new');
+                $("#newPackage-post").attr("<i class=\"fa fa-check\"></i>保存");
+            });
+            // 添加包
+            $("#newPackage-post").on("click", function () {
+
+                isTrue = checkPackageNameAndFileTitle();
+                if (isTrue) {
+                    $("#packageDesc").attr("value", $('.summernote-packageDesc').code());
+
+                    type = $(this).attr('btntype');
+                    console.log("package:" + type);
+                    if (type == 'new')
+                        var post_url = '/mixfunc/package/new';
+                    else
+                        var post_url = '/mixfunc/package/modify';
+
+                    $.ajax({
+                        cache: false,
+                        type: "post",
+                        url: post_url,
+                        data: $("#newPackageForm").serialize(),
+                        async: true,
+                        success: function (result) {
+                            jstreeInit(); // 刷新jstree
+                            result = jQuery.parseJSON(result);
+                            if (result.resultCode == 1) {
+                                toastr.success(result.resultDesc, "成功");
+                            } else {
+                                toastr.warning(result.resultDesc, "提示");
+                            }
+                        },
+                        error: function () {
+                            toastr.error("程序异常!", "错误提示");
+                        }
+                    });
+                }
+                else {
+                    toastr.error("请按提示要求填写!", "提示");
+                }
+            });
+
+            // 删除按钮
+            $("#remove").click(function () {
+                var removeid = $(this).attr('myid');
+                var removetype = $(this).attr('type');
+                swal({
+                        title: "您确定要删除吗",
+                        text: "删除后将无法恢复，请谨慎操作！",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "是的，我要删除！",
+                        cancelButtonText: "让我再考虑一下…",
+                        closeOnConfirm: false,
+                        closeOnCancel: false
+                    },
+                    function (isConfirm) {
+                        if (isConfirm) {
+                            $.ajax({
+                                cache: false,
+                                type: "post",
+                                url: "/mixfunc/delete",
+                                data: {id: removeid, type: removetype},
+                                async: true,
+                                success: function (result) {
+                                    jstreeInit(); // 刷新jstree
+                                    result = jQuery.parseJSON(result);
+                                    if (result.resultCode == 1) {
+                                        {#                                        toastr.success(result.resultDesc + " " + result.resultDetail + "条记录。", "成功");#}
+                                        swal("删除成功！", result.resultDesc + " " + result.resultDetail + "条记录。", "success");
+                                    } else {
+                                        swal("删除失败！", result.resultDesc, "warning");
+                                        {#                                        toastr.warning(result.resultDesc, "提示");#}
+                                    }
+                                },
+                                error: function () {
+                                    swal("程序异常！", "删除过程中出现了错误！", "error");
+                                    {#                                    toastr.error("程序异常!", "错误提示");#}
+                                }
+                            })
+
+                        } else {
+                            swal("已取消", "您取消了删除操作！", "error");
+                        }
+                    });
+
+            });
+
+            // 刷新jstree
+            function jstreeInit() {
+                $('#folders').data('jstree', false).empty();
+                $('#folders').jstree(
+                    {
+                        'core': {
+                            "themes": {
+                                "responsive": false
+                            },
+                            // so that create works
+                            "check_callback": true,
+                            'data':
+                                function (obj, callback) {
+                                    var jsonstr = "[]";
+                                    var jsonarray = eval('(' + jsonstr + ')');
+                                    $.ajax({
+                                        type: "POST",
+                                        url: "/mixfunc/packagefile/list",
+                                        dataType: "json",
+                                        async: false,
+                                        success: function (result) {
+                                            if (result.resultCode == 1) {
+                                                toastr.success(result.resultDesc, "成功");
+                                                var arrays = jQuery.parseJSON(result.resultDetail);
+                                                for (var i = 0; i < arrays.length; i++) {
+                                                    var packageJsonStr = "[]";
+                                                    var packageJsonArray = eval('(' + packageJsonStr + ')');
+                                                    var package = arrays[i].children;
+                                                    for (var j = 0; j < package.length; j++) {
+
+                                                        var fileJsonStr = "[]";
+                                                        var fileJsonArray = eval('(' + fileJsonStr + ')');
+                                                        var file = package[j].children;
+                                                        if (file != '')
+                                                            for (var k = 0; k < file.length; k++) {
+                                                                var files = {
+                                                                    "id": file[k].id,
+                                                                    "text": file[k].text,
+                                                                    "icon": file[k].icon
+                                                                }
+                                                                fileJsonArray.push(files);
+                                                            }
+                                                        var packageFolder = {
+                                                            "id": package[j].id,
+                                                            "text": package[j].text,
+                                                            "icon": package[j].icon,
+                                                            "state": {"opened": true},
+                                                            "children": fileJsonArray
+                                                        }
+                                                        packageJsonArray.push(packageFolder);
+                                                    }
+
+                                                    var arr = {
+                                                        "id": arrays[i].id,
+                                                        "text": arrays[i].text,
+                                                        "icon": arrays[i].icon,
+                                                        "state": {"opened": true, "selected": true},
+                                                        "children": packageJsonArray
+                                                    }
+                                                    jsonarray.push(arr);
+                                                }
+                                            }
+                                            else {
+                                                toastr.error(resultDict.resultDesc, "提示");
+                                            }
+                                        },
+                                        error: function () {
+                                            toastr.error("程序异常!", "提示");
+                                        }
+                                    });
+                                    callback.call(this, jsonarray);
+                                }
+                        }
+                    });
+            }
+
+            function getMyDate(str) {
+                var oDate = new Date(str),
+                    oYear = oDate.getFullYear(),
+                    oMonth = oDate.getMonth() + 1,
+                    oDay = oDate.getDate(),
+                    oHour = oDate.getHours(),
+                    oMin = oDate.getMinutes(),
+                    oSen = oDate.getSeconds(),
+                    oTime = oYear + '-' + getzf(oMonth) + '-' + getzf(oDay) + ' ' + getzf(oHour) + ':' + getzf(oMin) + ':' + getzf(oSen);//最后拼接时间
+                return oTime;
+            };
+
+            //补0操作
+            function getzf(num) {
+                if (parseInt(num) < 10) {
+                    num = '0' + num;
+                }
+                return num;
+            }
+
+            $("[data-event='showLinkDialog']").on("click", function () {
+                $(".modal-backdrop").remove();
+                console.log("showLinkDialog");
+            });
+            $("[data-event='showImageDialog']").on("click", function () {
+                $(".modal-backdrop").remove();
+                console.log("showImageDialog");
+            });
+            $("[data-event='showVideoDialog']").on("click", function () {
+                $(".modal-backdrop").remove();
+                console.log("showVideoDialog");
+            });
+            $(".modal-backdrop").remove();
+
+            // 查询方法文件里有哪些方法
+            $("#methodFileEdit-searchMethod").on("click", function () {
+
+                var methodFileId = $("#methodFileId").val();
+                var methodPackageId = $("#methodPackageId").val();
+                $result.html("请勾选方法！");
+                $("#addMethodBtn").attr("href", "/page/mixfunc/makeup?act=new&packageId=" + methodPackageId + "&fileId=" + methodFileId);
+
+                var timestamp = new Date().getTime();
+                var post_url = "/mixfunc/method/getall?time=" + timestamp + "&id=" + methodFileId;
+                // 第一次点击查询方法
+                if ($("#isNullTable").val() == "null") {
+                    $("#tableEvents").bootstrapTable({
+                        url: post_url,
+                        cache: false,
+                        method: "post",
+                        height: "200px",
+                        pageList: [5, 10, 25],
+                        pageSize: 5,
+                        search: true,
+                        pagination: true,
+                        showRefresh: true,
+                        showToggle: true,
+                        showColumns: true,
+                        singleSelect: true,
+                        iconSize: 'outline',
+                        toolbar: '#exampleTableEventsToolbar',
+                        icons: {
+                            refresh: 'glyphicon-repeat',
+                            toggle: 'glyphicon-list-alt',
+                            columns: 'glyphicon-list'
+                        }, silent: true,  //刷新事件必须设置
+                        formatLoadingMessage: function () {
+                            return "请稍等，正在加载中...";
+                        },
+                        formatNoMatches: function () {  //没有匹配的结果
+                            return '还没添加方法，点击下面的添加方法添加方法。';
+                        }
+                    });
+                    $("#isNullTable").val("not null");
+                }
+                // 非第一次查询方法只更新数据，不用配置bootstrapTable
+                else {
+                    $("#tableEvents").bootstrapTable("refresh", {url: post_url});
+                }
+            });
+
+            var $result = $('#tableEventsResult');
+            // 选择方法事件
+            $('#tableEvents').on('all.bs.table', function (e, name, args) {
+                // check.bs.table    uncheck.bs.table    check-all.bs.table    uncheck-all.bs.table
+                var sear = new RegExp('check');
+                if (sear.test(name)) {
+                    var a = "";
+                    $('input[type="checkbox"][name="btSelectItem"]:checked').each(
+                        function () {
+                            a = (a == "" ? a : a + ",") + $(this).attr("data-index");
+                        }
+                    );
+                    var alen = a.split(',').length;
+                    if (a == "") {
+                        $result.html("请勾选方法！");
+                        attrBtnMethodId("");
+                    }
+                    if (a != "" && alen == 1) {
+                        var methodid = ""
+                        try {
+                            methodid = args[0]._id.$oid;
+                        } catch (e) {
+                            methodid = args[0][0]._id.$oid;
+                        }
+                        $result.html("已勾选：" + methodid);
+                        attrBtnMethodId(methodid);
+                    }
+                    if (a != "" && alen > 1) {
+                        $result.html("一次只能选择一个！");
+                        attrBtnMethodId("");
+                    }
+                }
+            });
+
+            // 点击方法后给按钮赋予methodid
+            function attrBtnMethodId(value) {
+                $("#methodModify").attr("methodid", value);
+                $("#methodDetail").attr("methodid", value);
+                $("#methodDelete").attr("methodid", value);
+            }
+
+            //方法操作按钮
+            $(".methodActBtn").on("click", function () {
+                var methodid = $(this).attr("methodid");
+                var action = $(this).attr("id");
+                if (methodid != "") {
+
+                    if (action == "methodModify" || action == "methodDetail") {
+
+                        var url = "/page/mixfunc/detail?id=" + methodid;
+                        window.open(url, '原子能力方法', '');
+                    } else if (action == 'methodDelete') {
+                        swal({
+                                title: "您确定要删除吗",
+                                text: "删除后将无法恢复，请谨慎操作！",
+                                type: "warning",
+                                showCancelButton: true,
+                                confirmButtonColor: "#DD6B55",
+                                confirmButtonText: "是的，我要删除！",
+                                cancelButtonText: "让我再考虑一下…",
+                                closeOnConfirm: false,
+                                closeOnCancel: false
+                            },
+                            function (isConfirm) {
+                                if (isConfirm) {
+                                    $.ajax({
+                                        cache: false,
+                                        type: "post",
+                                        url: "/mixfunc/method/delete",
+                                        data: {id: methodid},
+                                        async: true,
+                                        success: function (result) {
+                                            jstreeInit(); // 刷新jstree
+                                            result = jQuery.parseJSON(result);
+                                            if (result.resultCode == 1) {
+                                                swal("删除成功！", result.resultDetail, "success");
+                                            } else {
+                                                swal("删除失败！", result.resultDesc, "warning");
+                                            }
+                                        },
+                                        error: function () {
+                                            swal("程序异常！", "删除过程中出现了错误！", "error");
+                                        }
+                                    })
+
+                                } else {
+                                    swal("已取消", "您取消了删除操作！", "warning");
+                                }
+                            });
+                    }
+                } else {
+                    swal("提示", "请先勾选一个方法！", "warning");
+                }
+            });
+        });
+    </script>
+{% endblock %}

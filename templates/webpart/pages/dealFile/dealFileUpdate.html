@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+{% extends "webpart/base/blankBase.html" %}
+{% block head %}
+    <!-- codemirror -->
+    <link href="{{ url_for('static',filename='css/plugins/codemirror/codemirror.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/plugins/codemirror/ambiance.css') }}" rel="stylesheet">
+    <!-- Sweet Alert -->
+    <link href="{{ url_for('static',filename='css/plugins/sweetalert/sweetalert.css') }}" rel="stylesheet">
+{% endblock %}
+{% block pageHeader %}
+    <div class="col-sm-4">
+        <h2>UpdateFile</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="table">处理流程脚本</a>
+            </li>
+            <li>
+                <a href="add">修改处理文件</a>
+            </li>
+        </ol>
+    </div>
+    <div class="col-sm-8">
+        <div class="title-action">
+            <a id="modify" class="btn btn-primary">修改</a>
+            <a href="table" class="btn btn-primary">返回</a>
+        </div>
+    </div>
+{% endblock %}
+{% block pageContent %}
+    <div class="col-sm-12">
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>流程代码</h5>
+
+            </div>
+            <div class="ibox-content">
+                <textarea id="dealCode" >{{ data.dealCode }}</textarea>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block pageJs %}
+    <!-- CodeMirror -->
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/codemirror.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/mode/python/python.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/mode/javascript/javascript.js') }}"></script>
+    <!-- Sweet alert -->
+    <script src="{{ url_for('static',filename='js/plugins/sweetalert/sweetalert.min.js') }}"></script>
+{% endblock %}
+{% block pageScript %}
+
+    <script>
+        $(document).ready(function () {
+            var codeEditor = CodeMirror.fromTextArea(document.getElementById("dealCode"), {
+                mode: {
+                    name: "python",
+                    version: 3,
+                    singleLineStringErrors: false
+                },
+                lineNumbers: true,
+                indentUnit: 4,
+                matchBrackets: true
+            });
+
+            $("#modify").on("click", function () {
+
+                item = {}
+                item ["id"] = {{ data.id }};
+                item ["dealCode"] = $("#dealCode").text();
+
+                jsonObj.push(item);
+
+                $.ajax({
+                    cache: false,
+                    type: "post",
+                    url: "/dealFile/modify",
+                    data: "",
+                    async: true,
+                    success: function (result) {
+                        alert(jsonObj)
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

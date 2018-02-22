@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Stict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang = "zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Title</title>
+    <link rel="shortcut icon" href="{{ url_for('static',filename='favicon.ico') }}">
+    <link href="{{ url_for('static',filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/font-awesome.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/animate.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+      <div class="container">
+
+        <form action="/updateblog" method="post" id="updateform">
+                <div hidden class="bId" id="bId" name="updateid" value='{{ data['name'] }}'></div>
+                <fieldset class="form-group">
+                    <label for="updateBlogName">blog名称</label>
+                    <input name="updatename" class="form-control" id="updateBlogName"  >
+                </fieldset>
+                <fieldset class="form-group" >
+                    <label for="updatecontent">blog内容</label>
+                    <input name="updatecontent"  class="form-control" id="updatecontent" >
+                </fieldset>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="submit" class="btn btn-danger btn-update" data-dismiss="modal">确定</button>
+             </form>
+      </div>
+
+<script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
+<script src="{{ url_for('static',filename='js/bootstrap.min.js') }}"></script>
+</body>
+
+<script>
+ $(function () {
+
+
+
+
+
+
+ })
+</script>
+</html>

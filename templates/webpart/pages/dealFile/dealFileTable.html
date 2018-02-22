@@ -1,0 +1,98 @@
+{% extends "webpart/base/blankBase.html" %}
+{% block pageHeader %}
+    <div class="col-sm-4">
+        <h2>DealFile</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="table">处理文件列表</a>
+            </li>
+        </ol>
+    </div>
+    <div class="col-sm-8">
+        <div class="title-action">
+{#            <a href="add" class="btn btn-primary">增加文件</a>#}
+        </div>
+    </div>
+{% endblock %}
+{% block pageContent %}
+
+    <div class="col-sm-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-content">
+                <table class="table table-striped table-bordered table-hover dataTables-example">
+                    <thead>
+                    <tr>
+                        <th data-field="url">序号</th>
+                        <th data-field="url">处理逻辑文件名</th>
+                        <th data-field="url">处理逻辑描述</th>
+                        <th data-field="url">处理工单类型</th>
+                        <th data-field="url">创建/修改人</th>
+                        <th data-field="url">操作时间</th>
+                        <th data-field="url">操作类型</th>
+                        <th data-field="url">审核状态</th>
+                        <th data-field="url">执行代码</th>
+                        <th data-field="url">删除代码</th>
+                    </tr>
+                    <tbody>
+                    {% for data in datas %}
+                        <tr>
+                            <th data-field="url">{{ data.id }}</th>
+                            <th data-field="url">{{ data.dealFileName }}</th>
+                            <th data-field="url">{{ data.dealFileDesc }}</th>
+                            <th data-field="url">{{ data.dealFileType }}</th>
+                            <th data-field="url">{{ data.dealFileUser }}</th>
+                            <th data-field="url">{{ data.dealFileTime }}</th>
+                            <th data-field="url">{{ data.actionType }}</th>
+                            <th data-field="url">{{ data.dealFileStatus }}</th>
+                            <th><a class="btn btn-primary  btn-xs" href="manage?id={{ data.id }}">管理</a></th>
+                            <th><a class="btn btn-danger btn-xs" id="delete" href="delete?id={{ data.id }}">删除</a></th>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block pageScript %}
+    <script src="{{ url_for('static',filename='js/jquery.min.js?v=2.1.4') }}"></script>
+    <script src="{{ url_for('static',filename='js/bootstrap.min.js?v=3.3.6') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/jeditable/jquery.jeditable.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/dataTables/jquery.dataTables.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/dataTables/dataTables.bootstrap.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/content.js?v=1.0.0') }}"></script>
+
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                type: "POST",
+                url: "/dealFile/getJobStatus",
+                async: false,
+                success: function (result) {
+                    var arrays = jQuery.parseJSON(result);
+                    for (var i = 0; i < arrays.length; i++) {
+{#                        console.log($("th").text())#}
+{#                        console.log(arrays[i].jobid)#}
+                        $("th").each(function () {
+                            if( $(this).text() == arrays[i].jobid ){
+                                 $(this).css("color", "red")
+                            }
+                        });
+                    }
+                },
+                error: function () {
+                    alert('error')
+                }
+            });
+
+            $("#modify").on("click", function () {
+
+            })
+
+        });
+
+    </script>
+{% endblock %}
+
+

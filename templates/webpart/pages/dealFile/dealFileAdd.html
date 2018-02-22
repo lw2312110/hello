@@ -1,0 +1,341 @@
+<!DOCTYPE html> {% extends "webpart/base/blankBase.html" %} {% block head %}
+<meta http-equiv="Expires" content="0" />
+
+
+<!-- sd-css -->
+<!-- <link rel="stylesheet" type="text/css" href="node_modules/codemirror/lib/codemirror.css" />
+<link rel="stylesheet" type="text/css" href="node_modules/bootstrap/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="css/style.css" /> -->
+<link href="{{ url_for('static',filename='css/bootstrap.min.css') }}" rel="stylesheet">
+<link href="{{ url_for('static',filename='css/block.css') }}" rel="stylesheet">
+<!-- sd-css end -->
+
+<!-- codemirror -->
+<link href="{{ url_for('static',filename='css/plugins/codemirror/codemirror.css') }}" rel="stylesheet">
+<link href="{{ url_for('static',filename='css/plugins/codemirror/ambiance.css') }}" rel="stylesheet">
+<!-- Sweet Alert -->
+<link href="{{ url_for('static',filename='css/plugins/sweetalert/sweetalert.css') }}" rel="stylesheet"> {% endblock %} {% block pageHeader %}
+<script>
+    function allowDrop(ev) {
+        ev.preventDefault();
+    }
+
+    function drag(ev) {
+        var code = ev.target.getAttribute('code');
+        var name = ev.target.getAttribute('name');
+        var input = ev.target.getAttribute('input');
+        var output = ev.target.getAttribute('output');
+        var displayName = ev.target.getAttribute('displayName');
+        var id = ev.target.getAttribute('id');
+        var dataJson = ev.target.getAttribute('dataJson');
+        var realInput = ev.target.getAttribute('realInput');
+        ev.dataTransfer.setData('id', id);
+        ev.dataTransfer.setData('code', code);
+        ev.dataTransfer.setData('name', name);
+        ev.dataTransfer.setData('input', input);
+        ev.dataTransfer.setData('output', output);
+        ev.dataTransfer.setData('type', 'codeblock');
+        ev.dataTransfer.setData('displayName', displayName);
+        ev.dataTransfer.setData('dataJson', dataJson);
+    }
+
+    function drawDecision(ev) {
+        ev.dataTransfer.setData('type', 'decision');
+    }
+
+    function drawCirculate(ev) {
+        ev.dataTransfer.setData('type', 'circulate');
+    }
+</script>
+
+<body>
+    <div class="container-fluid">
+        <div class="col-sm-12">
+            <div class="col-sm-4">
+                <h2>AddFile</h2>
+{#                <ol class="breadcrumb">#}
+{#                    <li>#}
+{#                        <a href="table">处理流程脚本</a>#}
+{#                    </li>#}
+{#                    <li>#}
+{#                        <a href="add">增加处理文件</a>#}
+{#                    </li>#}
+{#                </ol>#}
+            </div>
+            <div class="col-sm-8">
+                <div class="title-action">
+{#                    <a href="table" class="btn btn-primary">返回</a>#}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endblock %} {% block pageContent %}
+    <div class="container-box clearfix">
+        <div class="nav-box">
+            <ul id="nav"></ul>
+            <ul>
+                <li draggable="true" ondragstart="drawDecision(event)">if</li>
+                <li draggable="true" ondragstart="drawCirculate(event)">for</li>
+            </ul>
+        </div>
+        <div class="main panel">
+            <div id="main" class="flow-chart" ondragover="allowDrop(event)"></div>
+            <div class="button-box">
+                <button id="leading" class="create-btn">导入流程图</button>
+                <button id="save" class="create-btn">保存流程图</button>
+                <button id="edit" class="create-btn">编辑代码</button>
+                <button id="create" class="create-btn">生成代码</button>
+                <button id="clearGraph" class="create-btn">清除流程图</button>
+            </div>
+        </div>
+        <div class="output">
+            <textarea id="editor" style="width:100%;height:100%"></textarea>
+        </div>
+    </div>
+
+    <form class="form-horizontal" action="addCode" method="post">
+        <div class="col-sm-12">
+            <div class="col-sm-4">
+                <div class="ibox ">
+                    <p>流程创建信息登记</p>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">文件名称</label>
+
+                        <div class="col-sm-8">
+                            <input type="text" id="dealFileName" name="dealFileName" placeholder="处理逻辑文件名" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">文件描述</label>
+
+                        <div class="col-sm-8">
+                            <input type="text" id="dealFileDesc" name="dealFileDesc" placeholder="处理逻辑描述" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">工单类型</label>
+
+                        <div class="col-sm-8">
+                            <input type="text" id="dealFileType" name="dealFileType" placeholder="处理工单类型" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">操作人员</label>
+
+                        <div class="col-sm-8">
+                            <input type="text" id="dealFileUser" name="dealFileUser" placeholder="创建/修改人" class="form-control"> <span class="help-block m-b-none"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">操作类型</label>
+
+                        <div class="col-sm-8">
+                            <input type="text" id="actionType" name="actionType" placeholder="0：新建；1：修改" class="form-control"> <span class="help-block m-b-none"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">审核情况</label>
+
+                        <div class="col-sm-8">
+                            <input type="text" id="dealFileStatus" name="dealFileStatus" placeholder="0：待审核；1：审核通过；2：审核不通过" class="form-control"> <span class="help-block m-b-none"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-sm-offset-3 col-sm-8">
+                            <button class="btn btn-sm btn-white" type="submit">登 记</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-8">
+                <div class="ibox ">
+                    <div class="ibox-title">
+                        <h5>流程编辑</h5>
+
+                    </div>
+                    <div class="ibox-content">
+                        <textarea id="dealCode" name="dealCode"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- if语句分支选择模态框 -->
+    <div id="myModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">分支选择</h4>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        <input name="decision" type="radio" checked value="true" />是
+                        <input name="decision" type="radio" value="false" />否
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="confirm btn btn-primary">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 方法参数名称配置模态框 -->
+    <div id="config" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">配置</h4>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="confirm btn btn-primary">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- if语句条件填写模态框 -->
+    <div id="if" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">配置</h4>
+                </div>
+                <div class="modal-body">
+                    条件：
+                    <input type="text" name="condition" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="confirm btn btn-primary">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- for语句参数填写模态框 -->
+    <div id="for" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">配置</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="params-box params-ind">索引参数:
+                        <div class="select-box">
+                            <select class="params-ref">
+                                <option value="其他">其他</option>
+                            </select>
+                            <select class="params-return"></select>
+                        </div>
+                        <div class="params-input">
+                            <input class="params" name="forInd" value="" type="text">
+                        </div>
+                    </div>
+                    <div class="params-box params-obj">索引对象:
+                        <div class="select-box">
+                            <select class="params-ref">
+                                <option value="其他">其他</option>
+                            </select>
+                            <select class="params-return"></select>
+                        </div>
+                        <div class="params-input">
+                            <input class="params" name="forObj" value="" type="text">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="confirm btn btn-primary">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %} {% block pageJs %}
+    <!-- CodeMirror -->
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/codemirror.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/mode/python/python.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/mode/javascript/javascript.js') }}"></script>
+    <!-- Sweet alert -->
+    <script src="{{ url_for('static',filename='js/plugins/sweetalert/sweetalert.min.js') }}"></script>
+
+    <!-- sd-js -->
+    <!-- <script type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="node_modules/codemirror/lib/codemirror.js"></script> -->
+    <script src="{{ url_for('static',filename='node_modules/jquery/dist/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='node_modules/bootstrap/dist/js/bootstrap.min.js') }}"></script>
+    <!-- sd-js end -->
+
+
+    <script>
+        mxBasePath = 'libs/mxgraph/src/';
+        mxLoadResources = false;
+        var GLOBAL = {
+            MAIN_START: 'if __name__ == "__main__":',
+            INDENT: '    ',
+        };
+        var editor;
+        String.prototype.repeat = function(n) {
+            var rs = ''
+            for (var i = 0; i < n; i++) {
+                rs += this
+            }
+            return rs;
+        }
+    </script>
+
+
+    <!-- sd-js -->
+    <!--
+    <script type="text/javascript" src="libs/mxgraph/mxClient.min.js"></script>
+    <script type="text/javascript" src="js/mxGraph.extend.js"></script>
+    <script type="text/javascript" src="js/map.js"></script>
+    <script type="text/javascript" src="js/graph.js"></script>
+    <script src="js/main.js"></script> -->
+    <script src="{{ url_for('static',filename='libs/mxgraph/mxClient.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/mxGraph.extend.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/map.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/graph.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/main.js') }}"></script>
+    <!-- sd-js end -->
+
+
+    {% endblock %} {% block pageScript %}
+    <script>
+        $(document).ready(function() {
+            window.codeEditor = CodeMirror.fromTextArea(document.getElementById("dealCode"), {
+                mode: {
+                    name: "python",
+                    version: 3,
+                    singleLineStringErrors: false
+                },
+                lineNumbers: true,
+                indentUnit: 4,
+                matchBrackets: true
+            });
+        });
+    </script>
+    {% endblock %}
+</body>

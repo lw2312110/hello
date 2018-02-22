@@ -1,0 +1,833 @@
+{% extends "webpart/base/blankBase.html" %}
+
+{% block title %}原子方法组合{% endblock %}
+
+{% block head %}
+    <link href="{{ url_for('static',filename='css/plugins/iCheck/custom.css') }}" rel="stylesheet">
+    <!-- steps -->
+    <link href="{{ url_for('static',filename='css/plugins/steps/jquery.steps.css') }}" rel="stylesheet">
+    <!-- codemirror -->
+    <link href="{{ url_for('static',filename='css/plugins/codemirror/codemirror.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/plugins/codemirror/ambiance.css') }}" rel="stylesheet">
+    <!-- Toastr -->
+    <link href="{{ url_for('static',filename='css/plugins/toastr/toastr.min.css') }}" rel="stylesheet">
+    <!-- Sweet Alert -->
+    <link href="{{ url_for('static',filename='css/plugins/sweetalert/sweetalert.css') }}" rel="stylesheet">
+    <style>
+        .wizard > .steps > ul > li {
+            width: 20%;
+        }
+    </style>
+{% endblock %}
+
+{% block pageHeader %}
+    <div class="col-sm-4">
+        <h2>AMDO</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="/page/mixfunc">原子能力管理</a>
+            </li>
+            <li>
+                <a href="/page/mixfunc/makeup">原子方法组合</a>
+            </li>
+        </ol>
+    </div>
+    {#    <div class="col-sm-8">#}
+    {#        <div class="title-action">#}
+    {#            <a href="/page/mixfunc" class="btn btn-primary">刷新</a>#}
+    {#        </div>#}
+    {#    </div>#}
+{% endblock %}
+
+{% block pageContent %}
+    <div class="col-sm-12">
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>添加方法</h5>
+                <div class="ibox-tools">
+                    <a class="collapse-link">
+                        <i class="fa fa-chevron-up"></i>
+                    </a>
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="form_wizard.html#">
+                        <i class="fa fa-wrench"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">
+                        <li><a href="form_wizard.html#">选项1</a>
+                        </li>
+                        <li><a href="form_wizard.html#">选项2</a>
+                        </li>
+                    </ul>
+                    <a class="close-link">
+                        <i class="fa fa-times"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="ibox-content">
+                <h2>
+                    向 {{ package['packageName'] }}({{ package['packageTitle'] }})
+                    里的 {{ file['fileName'] }}({{ file['fileTitle'] }})
+                </h2>
+                <p>
+                    添加新方法
+                </p>
+
+                <form id="form" class="wizard-big">
+                    <input id="packageId" name="packageId" type="text" class="hidden"
+                           value="{{ package['_id']['$oid'] }}">
+                    <input id="fileId" name="fileId" type="text" class="hidden"
+                           value="{{ file["_id"]['$oid'] }}">
+                    <h1>基本信息</h1>
+                    <fieldset>
+                        <h2>方法信息</h2>
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <div class="form-group">
+                                    <label>方法函数名 *</label>
+                                    <input id="methodName" name="methodName" type="text" class="form-control"
+                                           placeholder="methodName">
+                                </div>
+                                <div class="form-group">
+                                    <label>方法名称 *</label>
+                                    <input id="methodTitle" name="methodTitle" type="text" class="form-control"
+                                           placeholder="方法中文名称">
+                                </div>
+                                <div class="form-group">
+                                    <label>简要描述 *</label>
+                                    <textarea id="methodDesc" name="methodDesc" type="text" style="height: 100px;"
+                                              class="form-control">请简要描述该方法
+                                    </textarea>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="text-center">
+                                    <div style="margin-top: 20px">
+                                        <i class="fa fa-sign-in" style="font-size: 180px;color: #e5e5e5 "></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </fieldset>
+
+                    <h1>接口信息</h1>
+                    <fieldset>
+                        <h2>接口信息</h2>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>接口类型 *</label>
+                                    <select id="methodInterfaceType" class="form-control m-b"
+                                            name="methodInterfaceType">
+                                        <option value="wsdl">WebService直接调用</option>
+                                        <option value="soap">Soap调用</option>
+                                        <option value="other">其他</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div id="wsdlSelect" style="display:block;">
+                                <div class="col-sm-8">
+                                    <div class="form-group">
+                                        <label>接口地址 *</label>
+                                        <input id="methodInterfaceUrl_wsdl" name="methodInterfaceUrl_wsdl" type="text"
+                                               class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label>接口方法 *</label>
+                                        <select id="methodInterfaceFunc_wsdl" class="form-control m-b"
+                                                name="methodInterfaceFunc_wsdl">
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="form-group">
+                                        <label>方法参数 *</label>
+                                        <input id="methodInterfaceFuncInput_wsdl" class="form-control m-b"
+                                               name="methodInterfaceFuncInput_wsdl">
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="soapSelect" style="display:none;">
+                                <div class="col-sm-8">
+                                    <div class="form-group">
+                                        <label>接口地址 *</label>
+                                        <input id="methodInterfaceUrl_soap" name="methodInterfaceUrl_soap" type="text"
+                                               class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label>soap方法 *</label>
+                                        <input id="methodInterfaceFunc_soap" class="form-control m-b"
+                                               name="methodInterfaceFunc_soap" value="None" placeholder="如没有，可为空">
+                                    </div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="form-group">
+                                        <label>方法参数 *</label>
+                                        <input id="methodInterfaceFuncInput_soap" class="form-control m-b"
+                                               name="methodInterfaceFuncInput_soap" value="(string input)">
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="otherSelect" style="display:none;">
+                                <div class="col-sm-8 hidden">
+                                    <div class="form-group">
+                                        <label>接口地址 *</label>
+                                        <input id="methodInterfaceUrl_other" name="methodInterfaceUrl_other" type="text"
+                                               class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-sm-4 hidden">
+                                    <div class="form-group">
+                                        <label>其他方法 *</label>
+                                        <input id="methodInterfaceFunc_other" class="form-control m-b"
+                                               name="methodInterfaceFunc_other" value="None" placeholder="如没有，可为空">
+                                    </div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="form-group">
+                                        <label>方法参数 *</label>
+                                        <input id="methodInterfaceFuncInput_other" class="func form-control m-b"
+                                               name="methodInterfaceFuncInput_other"
+                                               placeholder="field1,field2">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+
+                    <h1>入参</h1>
+                    <fieldset>
+                        <h2>入参模板</h2>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="tabs-container">
+                                    <input id="methodInName" class="form-control m-b hidden"
+                                           name="methodInName">
+                                    <ul id="methodInTabBtn" class="nav nav-tabs">
+                                        <li class="active"><a data-toggle="tab" href="#tab-1" aria-expanded="true">
+                                            第一个选项卡</a>
+                                        </li>
+                                    </ul>
+                                    <div id="methodInTabContent" class="tab-content">
+                                        <div id="theInputName" class="tab-pane active" style="display:none;">
+                                            <div class="panel-body">
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label>input入参模板 *</label>
+                                                        <textarea id="methodInModel-input"
+                                                                  name="methodInModel-input" type="text"
+                                                                  class="methodInModel form-control"
+                                                                  inputname="theCityName"
+                                                                  style="height: 170px;"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <div class="form-group">
+                                                        <label>input入参字段 *</label>
+                                                        <textarea id="methodInField-input"
+                                                                  name="methodInField-input" type="text"
+                                                                  class="methodInField form-control"
+                                                                  inputname="theCityName"
+                                                                  style="height: 170px;"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <div class="form-group">
+                                                        <label>input入参字段释义 *</label>
+                                                        <textarea id="methodInExplain-input"
+                                                                  name="methodInExplain-input" type="text"
+                                                                  class="methodInExplain form-control"
+                                                                  inputname="theCityName"
+                                                                  style="height: 170px;"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <h1>出参</h1>
+                    <fieldset>
+                        <h2>出参模板</h2>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="tabs-container">
+                                    <ul id="methodOutTabBtn" class="nav nav-tabs">
+                                        <li class="active"><a data-toggle="tab" href="#tab-1" aria-expanded="true">
+                                            出参模板编辑（如果模板不固定，请不要填写。）</a>
+                                        </li>
+                                    </ul>
+                                    <div id="methodOutTabContent" class="tab-content">
+                                        <div class="tab-pane active">
+                                            <div class="panel-body">
+                                                <div class="col-sm-5">
+                                                    <div class="form-group">
+                                                        <label>出参模板 *</label>
+                                                        <textarea id="methodOutModel"
+                                                                  name="methodOutModel" type="text"
+                                                                  class="methodOutModel form-control"
+                                                                  style="height: 170px;"></textarea>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-2">
+                                                    <div class="form-group">
+                                                        <label>出参字段 *</label>
+                                                        <textarea id="methodOutField"
+                                                                  name="methodOutField" type="text"
+                                                                  class="methodOutField form-control"
+                                                                  style="height: 170px;"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <div class="form-group">
+                                                        <label>出参取值路径 *</label>
+                                                        <textarea id="methodOutRoute"
+                                                                  name="methodOutRoute" type="text"
+                                                                  class="methodOutRoute form-control"
+                                                                  style="height: 170px;"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2">
+                                                    <div class="form-group">
+                                                        <label>出参字段释义 *</label>
+                                                        <textarea id="methodOutExplain"
+                                                                  name="methodOutExplain" type="text"
+                                                                  class="methodOutExplain form-control"
+                                                                  style="height: 170px;"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <h1>查看代码</h1>
+                    <fieldset>
+                        <h2>生成的代码</h2>
+                        <div class="col-sm-2">
+                            <div class="text-center">
+                                <a id="createMethodCode" style="margin-top: 20px">
+                                    <i class="fa fa-sign-out" style="font-size: 180px;color: #e5e5e5 "></i>
+                                    <br>生成代码
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-sm-10">
+                            <div class="form-group">
+                                <div class="clearfix"></div>
+                                <textarea id="code" name="code" type="text" class="form-control"
+                                          style="height: 220px;"></textarea>
+                            </div>
+                        </div>
+                        {#                        <div class="col-sm-2">#}
+                        {#                            <div class="text-center">#}
+                        {#                                <a id="modifyMethodCode" data-toggle="modal" data-target="#modifyCode"#}
+                        {#                                   style="margin-top: 20px">#}
+                        {#                                    <i class="fa fa-pencil" style="font-size: 180px;color: #e5e5e5 "></i>#}
+                        {#                                    <br>修改代码#}
+                        {#                                </a>#}
+                        {#                            </div>#}
+                        {#                        </div>#}
+                        <div class="modal inmodal fade" id="modifyCode" tabindex="-1" role="dialog"
+                             aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal"><span
+                                                aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                                        </button>
+                                        <h4 class="modal-title">编辑代码（点击以下空白框）</h4>
+                                    </div>
+                                    <div class="modal-body">
+
+                                        <textarea id="newcode" name="newcode"></textarea>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <a id="addMethodBtn" href="#" type="button"
+                                           class="btn btn-white">保存代码</a>
+                                        <button type="button" class="btn btn-primary" data-dismiss="modal">
+                                            关闭
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block pageJs %}
+    <!-- CodeMirror -->
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/codemirror.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/mode/python/python.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/codemirror/mode/javascript/javascript.js') }}"></script>
+    <!-- Steps -->
+    <script src="{{ url_for('static',filename='js/plugins/staps/jquery.steps.min.js') }}"></script>
+    <!-- Jquery Validate -->
+    <script src="{{ url_for('static',filename='js/plugins/validate/jquery.validate.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/validate/validate.extend.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/plugins/validate/messages_zh.min.js') }}"></script>
+    <!-- Toastr script -->
+    <script src="{{ url_for('static',filename='js/plugins/toastr/toastr.min.js') }}"></script>
+    <!-- Sweet alert -->
+    <script src="{{ url_for('static',filename='js/plugins/sweetalert/sweetalert.min.js') }}"></script>
+{% endblock %}
+
+{% block pageScript %}
+    <script>
+        $(document).ready(function () {
+
+            $("#wizard").steps();
+            $("#form").steps({
+                bodyTag: "fieldset",
+                onStepChanging: function (event, currentIndex, newIndex) {
+                    // Always allow going backward even if the current step contains invalid fields!
+                    if (currentIndex > newIndex) {
+                        return true;
+                    }
+
+                    // Forbid suppressing "Warning" step if the user is to young
+                    if (newIndex === 3 && Number($("#age").val()) < 18) {
+                        return false;
+                    }
+
+                    var form = $(this);
+
+                    // Clean up if user went backward before
+                    if (currentIndex < newIndex) {
+                        // To remove error styles
+                        $(".body:eq(" + newIndex + ") label.error", form).remove();
+                        $(".body:eq(" + newIndex + ") .error", form).removeClass("error");
+                    }
+
+                    // Disable validation on fields that are disabled or hidden.
+                    form.validate().settings.ignore = ":disabled,:hidden";
+
+                    // Start validation; Prevent going forward if false
+                    return form.valid();
+                },
+                onStepChanged: function (event, currentIndex, priorIndex) {
+                    // Suppress (skip) "Warning" step if the user is old enough.
+                    if (currentIndex === 2 && Number($("#age").val()) >= 18) {
+                        $(this).steps("next");
+                    }
+
+                    // Suppress (skip) "Warning" step if the user is old enough and wants to the previous step.
+                    if (currentIndex === 2 && priorIndex === 3) {
+                        $(this).steps("previous");
+                    }
+                },
+                onFinishing: function (event, currentIndex) {
+                    var form = $(this);
+
+                    // Disable validation on fields that are disabled.
+                    // At this point it's recommended to do an overall check (mean ignoring only disabled fields)
+                    form.validate().settings.ignore = ":disabled";
+
+                    // Start validation; Prevent form submission if false
+                    return form.valid();
+                },
+                onFinished: function (event, currentIndex) {
+                    var form = $(this);
+                    $("#code").val(methodCodeEditor.getValue());
+                    // Submit form input
+                    // form.submit();
+                    $.ajax({
+                        cache: false,
+                        type: 'post',
+                        url: '/mixfunc/method/new',
+                        data: $("#form").serialize(),
+                        async: true,
+                        success: function (result) {
+                            var resultObj = jQuery.parseJSON(result);
+                            if (resultObj.resultCode == 1) {
+                                toastr.success(resultObj.resultDesc, "提示");
+                            } else {
+                                toastr.warning(resultObj.resultDesc, "提示");
+                            }
+                        }, error: function () {
+                            toastr.error("程序异常!", "提示");
+                        }
+                    });
+                }
+            }).validate({
+                errorPlacement: function (error, element) {
+                    element.before(error);
+                },
+                rules: {
+                    methodName: {
+                        required: true,
+                        isLetter: true,
+                        remote: {
+                            url: "/mixfunc/method/validateName",
+                            type: "post",
+                            datatype: "json",
+                            data: {                     //要传递的数据
+                                package: function () {
+                                    return $("#packageId").val();
+                                },
+                                methodFile: function () {
+                                    return $("#fileId").val();
+                                }
+                            }
+                        }
+                    },
+                    methodTitle: {
+                        required: true
+                    },
+                    methodDesc: {
+                        required: true
+                    },
+                    //methodInterfaceUrl_wsdl: {
+                    //    required: true,
+                    //    url: true
+                    //}
+                },
+                messages: {
+                    methodName: {
+                        required: "请输入方法函数名！",
+                        isLetter: "请输入正确格式的方法函数名（只能是字母和数字组合）",
+                        remote: "方法名重复，请重新输入！"
+                    },
+                    methodTitle: {
+                        required: "请输入方法名称！"
+                    },
+                    methodDesc: {
+                        required: "请输入方法描述！"
+                    }
+                    {#,#}
+                    {#methodInterfaceUrl_wsdl: {#}
+                    {#    required: "请输入接口地址！",#}
+                    {#    url: "请输出正确的地址！"#}
+                    //}
+                }
+            });
+
+            $("#methodInterfaceType").change(function () {
+                var selectVal = $(this).val();
+                if (selectVal == "wsdl") {
+                    $("#createMethodCode").attr("style", "display:block;");
+
+                    $("#wsdlSelect").attr("style", "display:block;");
+                    $("#soapSelect").attr("style", "display:none;");
+                    $("#otherSelect").attr("style", "display:none;");
+                }
+                if (selectVal == "soap") {
+                    $("#createMethodCode").attr("style", "display:block;");
+                    $("#soapSelect").attr("style", "display:block;");
+                    $("#wsdlSelect").attr("style", "display:none;");
+                    $("#otherSelect").attr("style", "display:none;");
+
+                    $("#methodInTabBtn").empty();
+                    $("#methodInTabContent").empty();
+                    var inputName = "input";
+                    var isactive = "active";
+                    var ispanded = "true";
+                    $("#methodInTabBtn").append("<li class=\"" + isactive + "\" style=\"list-style-type:none;\"><a data-toggle=\"tab\" href=\"#" + inputName + "\" aria-expanded=\"" + ispanded + "\">input</a></li>");
+                    $("#methodInTabContent").append("<div id=\"" + inputName + "\" class=\"tab-pane " + isactive + "\">\n" +
+                        "                           <div class=\"panel-body\">\n" +
+                        "                               <div class=\"col-sm-6\">\n" +
+                        "                                   <div class=\"form-group\">\n" +
+                        "                                       <label>" + inputName + "入参模板 *</label>\n" +
+                        "                                       <textarea id=\"methodInModel-" + inputName + "\" name=\"methodInModel-" + inputName + "\" type=\"text\"\n" +
+                        "                                                 class=\"methodInModel form-control required\" inputName = \"" + inputName + "\" style=\"height: 170px;\"></textarea>\n" +
+                        "                                   </div>\n" +
+                        "                               </div>\n" +
+                        "                               <div class=\"col-sm-3\">\n" +
+                        "                                   <div class=\"form-group\">\n" +
+                        "                                       <label>" + inputName + "入参字段 *</label>\n" +
+                        "                                       <textarea id=\"methodInField-" + inputName + "\" name=\"methodInField-" + inputName + "\" type=\"text\"\n" +
+                        "                                                 class=\"methodInField form-control required\" inputName = \"" + inputName + "\" style=\"height: 170px;\"></textarea>\n" +
+                        "                                   </div>\n" +
+                        "                               </div>\n" +
+                        "                               <div class=\"col-sm-3\">\n" +
+                        "                                   <div class=\"form-group\">\n" +
+                        "                                       <label>" + inputName + "入参字段释义 *</label>\n" +
+                        "                                       <textarea id=\"methodInExplain-" + inputName + "\" name=\"methodInExplain-" + inputName + "\" type=\"text\"\n" +
+                        "                                                 class=\"methodInExplain form-control required\" inputName = \"" + inputName + "\" style=\"height: 170px;\"></textarea>\n" +
+                        "                                   </div>\n" +
+                        "                               </div>\n" +
+                        "                           </div>\n" +
+                        "                           </div>");
+                    $("#methodInName").val(inputName);
+                }
+                if (selectVal == "other") {
+                    $("#createMethodCode").attr("style", "display:block;");
+                    $("#wsdlSelect").attr("style", "display:none;");
+                    $("#soapSelect").attr("style", "display:none;");
+                    $("#otherSelect").attr("style", "display:block;");
+                }
+            });
+
+            // 输入url地址触发，解析wsdl地址，得到wsdl提供了哪些方法
+            var methodFunctions;
+            $("#methodInterfaceUrl_wsdl").bind("input propertychange", "textarea", function () {
+                var methodInterfaceType = $("#methodInterfaceType").val();
+                if (methodInterfaceType == "wsdl") {
+                    $.ajax({
+                        cache: false,
+                        type: 'post',
+                        url: '/mixfunc/methods/getJson',
+                        data: {
+                            "url": $(this).val(),
+                            "methodInterfaceType": methodInterfaceType
+                        },
+                        async: true,
+                        success: function (result) {
+                            var resultObj = jQuery.parseJSON(result);
+                            if (resultObj.resultCode == 1) {
+                                methodFunctions = jQuery.parseJSON(resultObj.resultDetail).methods;
+                                $("#methodInterfaceFunc_wsdl").empty();
+                                for (i = 0; i < methodFunctions.length; i++) {
+                                    var methodName = methodFunctions[i].name;
+                                    $("#methodInterfaceFunc_wsdl").append("<option item='" + i + "' value='" + methodName + "'>" + methodName + "</option>");
+                                }
+                                // 只有一个方法的时候直接填充入参
+                                if (methodFunctions.length > 0) {
+                                    fillInput(methodFunctions, 0);
+                                }
+                            } else {
+                                {#toastr.warning(resultObj.resultDesc, "提示");#}
+                            }
+                        },
+                        error: function () {
+                            toastr.error("程序异常!", "提示");
+                        }
+                    })
+                }
+            });
+            // 选择方法名触发，获取该方法参数
+            $("#methodInterfaceFunc_wsdl").change(function () {
+                var item = $(this).children('option:selected').attr("item");
+                var value = $(this).children('option:selected').val();
+                fillInput(methodFunctions, item);
+            });
+
+            //填充入参输入框
+            function fillInput(methodFunctions, item) {
+                var inputs = methodFunctions[item].input;
+                var input = "";
+                var inputNames = [];
+                $("#methodInTabBtn").empty();
+                $("#methodInTabContent").empty();
+                for (i = 0; i < inputs.length; i++) {
+                    var inputName = inputs[i].inputName;
+                    inputNames.push(inputName);
+                    input = input + inputs[i].inputType + " " + inputName + ", ";
+                    var ispanded = (i == 0 ? "true" : "false");
+                    var isactive = (i == 0 ? "active" : "");
+                    $("#methodInTabBtn").append("<li class=\"" + isactive + "\" style=\"list-style-type:none;\"><a data-toggle=\"tab\" href=\"#" + inputName + "\" aria-expanded=\"" + ispanded + "\">" + inputs[i].inputName + "</a></li>");
+
+                    $("#methodInTabContent").append("<div id=\"" + inputName + "\" class=\"tab-pane " + isactive + "\">\n" +
+                        "                           <div class=\"panel-body\">\n" +
+                        "                               <div class=\"col-sm-6\">\n" +
+                        "                                   <div class=\"form-group\">\n" +
+                        "                                       <label>" + inputName + "入参模板 *</label>\n" +
+                        "                                       <textarea id=\"methodInModel-" + inputName + "\" name=\"methodInModel-" + inputName + "\" type=\"text\"\n" +
+                        "                                                 class=\"methodInModel form-control required\" inputName = \"" + inputName + "\" style=\"height: 170px;\"></textarea>\n" +
+                        "                                   </div>\n" +
+                        "                               </div>\n" +
+                        "                               <div class=\"col-sm-3\">\n" +
+                        "                                   <div class=\"form-group\">\n" +
+                        "                                       <label>" + inputName + "入参字段 *</label>\n" +
+                        "                                       <textarea id=\"methodInField-" + inputName + "\" name=\"methodInField-" + inputName + "\" type=\"text\"\n" +
+                        "                                                 class=\"methodInField form-control required\" inputName = \"" + inputName + "\" style=\"height: 170px;\"></textarea>\n" +
+                        "                                   </div>\n" +
+                        "                               </div>\n" +
+                        "                               <div class=\"col-sm-3\">\n" +
+                        "                                   <div class=\"form-group\">\n" +
+                        "                                       <label>" + inputName + "入参字段释义 *</label>\n" +
+                        "                                       <textarea id=\"methodInExplain-" + inputName + "\" name=\"methodInExplain-" + inputName + "\" type=\"text\"\n" +
+                        "                                                 class=\"methodInExplain form-control required\" inputName = \"" + inputName + "\" style=\"height: 170px;\"></textarea>\n" +
+                        "                                   </div>\n" +
+                        "                               </div>\n" +
+                        "                           </div>\n" +
+                        "                           </div>");
+                }
+                input = input.substring(0, input.length - 2);
+                var result = "(" + input + ")";
+                $("#methodInName").val(inputNames);
+                $("#methodInterfaceFuncInput_wsdl").val(result == "()" ? "无参数" : result);
+            };
+
+            $("#otherSelect").on("input propertychange", "#methodInterfaceFuncInput_other", function () {
+                var inputNames = $(this).val();
+                console.log("inputNames:"+inputNames);
+                $("#methodInName").val(inputNames);
+                var inputNameList = inputNames.split(",");
+                console.log("inputNameList:"+inputNameList);
+                $("#methodInTabBtn").empty();
+                $("#methodInTabContent").empty();
+                for (i = 0; i < inputNameList.length; i++) {
+                    var inputName = inputNameList[i];
+                    console.log(inputName);
+                    var ispanded = (i == 0 ? "true" : "false");
+                    var isactive = (i == 0 ? "active" : "");
+                    $("#methodInTabBtn").append("<li class=\"" + isactive + "\" style=\"list-style-type:none;\"><a data-toggle=\"tab\" href=\"#" + inputName + "\" aria-expanded=\"" + ispanded + "\">" + inputName + "</a></li>");
+
+                    $("#methodInTabContent").append("<div id=\"" + inputName + "\" class=\"tab-pane " + isactive + "\">\n" +
+                        "                           <div class=\"panel-body\">\n" +
+                        "                               <div class=\"col-sm-6\">\n" +
+                        "                                   <div class=\"form-group\">\n" +
+                        "                                       <label>" + inputName + "入参模板 *</label>\n" +
+                        "                                       <textarea id=\"methodInModel-" + inputName + "\" name=\"methodInModel-" + inputName + "\" type=\"text\"\n" +
+                        "                                                 class=\"methodInModel form-control required\" inputName = \"" + inputName + "\" style=\"height: 170px;\"></textarea>\n" +
+                        "                                   </div>\n" +
+                        "                               </div>\n" +
+                        "                               <div class=\"col-sm-3\">\n" +
+                        "                                   <div class=\"form-group\">\n" +
+                        "                                       <label>" + inputName + "入参字段 *</label>\n" +
+                        "                                       <textarea id=\"methodInField-" + inputName + "\" name=\"methodInField-" + inputName + "\" type=\"text\"\n" +
+                        "                                                 class=\"methodInField form-control required\" inputName = \"" + inputName + "\" style=\"height: 170px;\"></textarea>\n" +
+                        "                                   </div>\n" +
+                        "                               </div>\n" +
+                        "                               <div class=\"col-sm-3\">\n" +
+                        "                                   <div class=\"form-group\">\n" +
+                        "                                       <label>" + inputName + "入参字段释义 *</label>\n" +
+                        "                                       <textarea id=\"methodInExplain-" + inputName + "\" name=\"methodInExplain-" + inputName + "\" type=\"text\"\n" +
+                        "                                                 class=\"methodInExplain form-control required\" inputName = \"" + inputName + "\" style=\"height: 170px;\"></textarea>\n" +
+                        "                                   </div>\n" +
+                        "                               </div>\n" +
+                        "                           </div>\n" +
+                        "                           </div>");
+                }
+
+            });
+
+            // 输入入参模板
+            $("#methodInTabContent").on("input propertychange", ".methodInModel", function () {
+                var thisInModel = $(this);
+                var inputName = thisInModel.attr("inputName");
+                $.ajax({
+                    cache: false,
+                    type: 'post',
+                    url: '/mixfunc/method/methodIn/resolve',
+                    data: "methodInput=" + encodeURIComponent($("#methodInModel-" + inputName).val()),
+                    async: true,
+                    success: function (result) {
+                        var resultObj = jQuery.parseJSON(result);
+                        if (resultObj.resultCode == 1) {
+                            var methodInputs = jQuery.parseJSON(resultObj.resultDetail);
+                            var methodInField = ""; // 解析出字段
+                            for (i = 0; i < methodInputs.length; i++) {
+                                methodInField = methodInField + methodInputs[i] + "\n";
+                            }
+                            methodInField = methodInField.substring(0, methodInField.length - 1);
+                            $("#methodInField-" + inputName).val(methodInField); // 展示解析出来的字段
+                        } else {
+                            toastr.warning(resultObj.resultDesc, "提示");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("程序异常!", "提示");
+                    }
+                })
+            });
+
+            // 解析出参模板
+            $("#methodOutTabContent").on("input propertychange", ".methodOutModel", function () {
+                $.ajax({
+                    cache: false,
+                    type: 'post',
+                    url: '/mixfunc/method/methodIn/resolve',
+                    data: {"methodInput": $("#methodOutModel").val()},
+                    async: true,
+                    success: function (result) {
+                        var resultObj = jQuery.parseJSON(result);
+                        if (resultObj.resultCode == 1) {
+                            var methodOutputs = jQuery.parseJSON(resultObj.resultDetail);
+                            var methodOutField = ""; // 解析出字段
+                            for (i = 0; i < methodOutputs.length; i++) {
+                                methodOutField = methodOutField + methodOutputs[i] + "\n";
+                            }
+                            methodOutField = methodOutField.substring(0, methodOutField.length - 1);
+                            $("#methodOutField").val(methodOutField); // 展示解析出来的字段
+                        } else {
+                            toastr.warning(resultObj.resultDesc, "提示");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("程序异常!", "提示");
+                    }
+                })
+            });
+
+            // 选择方法名触发，获取该方法参数
+            $("#methodInterfaceFuncInputSelect").change(function () {
+                var id = $(this).val();
+                $(".inputDiv").attr("style", "display:none;");
+                $("#" + id).attr("style", "display:black;");
+            });
+
+            //生成代码查看
+            var methodCodeEditor = CodeMirror.fromTextArea(document.getElementById("code"), {
+                mode: {
+                    name: "python",
+                    version: 3,
+                    singleLineStringErrors: false
+                },
+                lineNumbers: true,
+                indentUnit: 4,
+                matchBrackets: true,
+                autoRefresh: true,
+            });
+            methodCodeEditor.setSize('auto', '280px');
+
+            //生成代码
+            $("#createMethodCode").on("click", function () {
+                console.log($("#form").serializeObject());
+                    $.ajax({
+                        cache: false,
+                        type: 'post',
+                        url: '/mixfunc/method/createCode',
+                        data: $("#form").serialize(),
+                        async: true,
+                        success: function (result) {
+                            var resultObj = jQuery.parseJSON(result);
+                            if (resultObj.resultCode == 1) {
+                                var code = resultObj.resultDetail;
+                                methodCodeEditor.setValue(code);
+                                $("#code").val(code);
+                                toastr.success("生成代码成功!", "提示");
+                            } else {
+                                toastr.error("程序异常!", "提示");
+                            }
+                        }, error: function () {
+                            toastr.error("程序异常!", "提示");
+                        }
+                    });
+            });
+
+            $.fn.serializeObject = function () {
+                var o = {};
+                var a = this.serializeArray();
+                $.each(a, function () {
+                    if (o[this.name] !== undefined) {
+                        if (!o[this.name].push) {
+                            o[this.name] = [o[this.name]];
+                        }
+                        o[this.name].push(this.value || '');
+                    } else {
+                        o[this.name] = this.value || '';
+                    }
+                });
+                return o;
+            };
+        });
+    </script>
+{% endblock %}
