@@ -176,25 +176,6 @@
                 window.location.href=$.trim($("#url").val());
             });
 
-       $("#modify").on("click", function () {
-
-                item = {}
-                item ["id"] = {{ data.id }};
-                item ["dealCode"] = $("#dealCode").text();
-
-                jsonObj.push(item);
-
-                $.ajax({
-                    cache: false,
-                    type: "post",
-                    url: "/dealFile/modify",
-                    data: "",
-                    async: true,
-                    success: function (result) {
-                        alert(jsonObj)
-                    }
-                });
-            });
 
 
        <!--
@@ -218,15 +199,9 @@
 
 
 <!--
-  $(".btn-update").click(function () {
-                $('#bId').val($(this).parentsUntil("td").siblings(".bid").html());
-                var $blog = $(this).parentsUntil("tr");
-                $('#updateBlogName').val($blog.siblings(".blogname").html());
-                $('#updatecontent').val($blog.siblings(".blogcontent").html());
-                var $blogId = $(this).parentsUntil("td").siblings(".bid").html();
-                $("#modal-form").attr("action","/updateblog?id=" +$blogId);
-                $('#updateBlogModal').modal("show");
-            });
+
+
+
  -->
 
 

@@ -57,20 +57,22 @@ def updateblogtest():
     try:
        blogid = request.args.get('id')
        blogs=blog.objects(id=ObjectId(blogid)).first()
+       return render_template('updateblog.html', data=blogs)
     except Exception, e:
        return "更新博客出错updatetest"
-    return render_template('updateblog.html',data=blogs)
+
 
 @hello_page.route('/updateblog', methods=['GET', 'POST'])
 def updateblog():
     try:
-        blogid = request.form.get("updateid")
-        name=request.form.get("updatename")
-        content=request.form.get("updatecontent")
+        blogid = request.form.get("id")
+        name=request.form.get("name")
+        content=request.form.get("content")
         blogService().updateblog(blogid,name,content)
+        return 'ok'
     except Exception, e:
         return "更新博客出错updateblog"
-    return render_template('table.html',datas=blog.objects)
+    return render_template('table.html', datas=blog.objects)
 
 
 

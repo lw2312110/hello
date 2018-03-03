@@ -12,27 +12,45 @@
 <body>
       <div class="container">
 
-        <form action="/updateblog" method="post" id="updateform">
-                <div hidden class="bId" id="bId" name="updateid" value='{{ data['name'] }}'></div>
+        <form action="" method="post" id="updateform">
+                <div hidden class="bId" id="bId" name="updateid" value='{{ data.id }}'></div>
                 <fieldset class="form-group">
                     <label for="updateBlogName">blog名称</label>
-                    <input name="updatename" class="form-control" id="updateBlogName"  >
+                    <input name="updatename" class="form-control" id="updateBlogName" value='{{ data.name }}' >
                 </fieldset>
                 <fieldset class="form-group" >
                     <label for="updatecontent">blog内容</label>
-                    <input name="updatecontent"  class="form-control" id="updatecontent" >
+                    <input name="updatecontent"  class="form-control" id="updatecontent" value='{{ data.content }}'>
                 </fieldset>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
-                <button type="submit" class="btn btn-danger btn-update" data-dismiss="modal">确定</button>
+                <button type="button" class="btn btn-danger btn-update" data-dismiss="modal">确定</button>
              </form>
       </div>
 
 <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
 <script src="{{ url_for('static',filename='js/bootstrap.min.js') }}"></script>
+
 </body>
 
 <script>
  $(function () {
+
+ $(".btn-update").on("click", function () {
+                    $.ajax({
+                        type: "POST",
+                        url: "/updateblog",
+                        data: {id: "{{ data.id }}", name:$('#updateBlogName').val(),content:$('#updatecontent').val()},
+                        async: false,
+                        success: function (result) {
+                            alert('ok');
+                        },
+                        error: function () {
+                            alert('error');
+
+                        }
+                    })
+
+            });
 
 
 
