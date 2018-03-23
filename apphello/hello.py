@@ -69,10 +69,12 @@ def updateblog():
         name=request.form.get("name")
         content=request.form.get("content")
         blogService().updateblog(blogid,name,content)
-        return 'ok'
+        #return 'ok'
+        return render_template('table.html', datas=blog.objects)
     except Exception, e:
         return "更新博客出错updateblog"
-    return render_template('table.html', datas=blog.objects)
+    #return render_template('table.html', datas=blog.objects)
+    #return redirect('table.html', datas=blog.objects)
 
 
 
