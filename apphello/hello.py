@@ -1,22 +1,15 @@
 # -*- coding:utf-8 -*-
-# 2017-11-08 10:54:53
 import sys
 from model.blog import blog
 from service.blogService import blogService
 reload(sys)
 sys.setdefaultencoding("utf8")
-from flask_bootstrap import Bootstrap
-from flask import Flask
-import os
-app = Flask(__name__)
 
-bootstrap = Bootstrap(app)
+import os
+
 from bson import ObjectId
-from flask_moment import Moment
-moment = Moment(app)
 
 from flask import Blueprint, render_template, abort, request, json,session,flash,redirect,url_for
-
 hello_page = Blueprint('hello', __name__, template_folder='../templates')
 
 
@@ -65,16 +58,17 @@ def updateblogtest():
 @hello_page.route('/updateblog', methods=['GET', 'POST'])
 def updateblog():
     try:
-        blogid = request.form.get("id")
+        blogid = request.form.get("testid")
         name=request.form.get("name")
         content=request.form.get("content")
         blogService().updateblog(blogid,name,content)
-        #return 'ok'
-        return render_template('table.html', datas=blog.objects)
+        return '添加博客成功'
+
     except Exception, e:
         return "更新博客出错updateblog"
     #return render_template('table.html', datas=blog.objects)
-    #return redirect('table.html', datas=blog.objects)
+    #return redirect(url_for('hello_page.table'))
+    #window.location.href="/table";
 
 
 

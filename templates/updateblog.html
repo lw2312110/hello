@@ -39,10 +39,10 @@
                     $.ajax({
                         type: "POST",
                         url: "/updateblog",
-                        data: {id: "{{ data.id }}", name:$('#updateBlogName').val(),content:$('#updatecontent').val()},
+                        data: {testid: "{{ data.id }}", name:$('#updateBlogName').val(),content:$('#updatecontent').val()},
                         async: false,
                         success: function (result) {
-                            alert('ok');
+                            alert(result);
                             window.location.href="/table";
                         },
                         error: function () {

@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-# 2017-11-08 10:54:53
 import sys
 reload(sys)
 sys.setdefaultencoding("utf8")
@@ -12,8 +11,9 @@ bootstrap = Bootstrap(app)
 from flask_moment import Moment   #这一类的import和定义要写在启动文件上
 moment = Moment(app)
 
-from apphello import hello
+from apphello import hello,userroute
 app.register_blueprint(hello.hello_page)
+app.register_blueprint(userroute.user_page)
 
 
 
