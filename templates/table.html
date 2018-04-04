@@ -46,7 +46,7 @@
                             <td>
                                 <div hidden class="bid">{{ data.id }}</div>
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <a  class="btn btn-primary  btn-xs btn-update" href="/updatetest?id={{ data.id }}">管理</a>
+                                    <a class="btn btn-primary  btn-xs btn-update" href="/updatetest?id={{ data.id }}">管理</a>
                                     <a class="btn btn-danger btn-xs btn-del"  >删除</a>
                                 </div>
                             </td>
@@ -81,7 +81,7 @@
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-
+<!--
 <div class="modal fade" id="updateBlogModal">
     <div class="modal-dialog">
         <div class="modal-content message_align">
@@ -90,24 +90,24 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span>×</span></button>
             </div>
             <div class="modal-body">
-                 <form action="/updateblog" method="post" id="updateform">
-                <div hidden class="bId" id="bId" name="bId" ></div>
+                 <form action="" method="post" id="updateform">
+                <div hidden class="bId" id="bId" name="updateid" value=''></div>
                 <fieldset class="form-group">
                     <label for="updateBlogName">blog名称</label>
-                    <input name="name" class="form-control" id="updateBlogName"  >
+                    <input name="updatename" class="form-control" id="updateBlogName" value='' >
                 </fieldset>
                 <fieldset class="form-group" >
                     <label for="updatecontent">blog内容</label>
-                    <input name="content"  class="form-control" id="updatecontent" >
+                    <input name="updatecontent"  class="form-control" id="updatecontent" value=''>
                 </fieldset>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
-                <button type="submit" class="btn btn-danger" data-dismiss="modal">确定</button>
+                <button type="button" class="btn btn-danger btn-updateblog" data-dismiss="modal">确定</button>
              </form>
             </div>
     </div>
   </div>
 </div>
-
+-->
 
 
 <div class="modal fade" id="addBlogModal">
@@ -160,6 +160,30 @@
        $(".modal-btn-del").click(function () {
                 window.location.href=$.trim($("#url").val());
             });
+<!--
+       $(".btn-update").click(function (){
+           var $blogId = $(this).parentsUntil("td").siblings(".bid").html();
+           $('updateBlogModal').modal("show");
+           $(".btn-updateblog").on("click", function () {
+                    $.ajax({
+                        type: "POST",
+                        url: "/updateblog",
+                        data: {testid: $blogId, name:$('#updateBlogName').val(),content:$('#updatecontent').val()},
+                        async: false,
+                        success: function (result) {
+                            alert(result);
+                            window.location.href="/table";
+                        },
+                        error: function () {
+                            alert('error');
+
+                        }
+                    })
+
+            });
+       });
+-->
+
        $(".btn-add").click(function () {
 
            $('#addBlogModal').modal("show");
@@ -181,6 +205,8 @@
 
             });
        });
+
+
 
 
 
