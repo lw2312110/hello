@@ -21,7 +21,7 @@
     </div>
     <div class="col-sm-8">
         <div class="title-action">
-            <a  href="/addtest" class="btn btn-primary btn-add"  >增加blog</a>
+            <button class="btn btn-primary btn-add"  >增加blog</button>
         </div>
     </div>
 
@@ -81,7 +81,7 @@
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-<!--
+
 <div class="modal fade" id="updateBlogModal">
     <div class="modal-dialog">
         <div class="modal-content message_align">
@@ -108,8 +108,8 @@
   </div>
 </div>
 
--->
-<!--
+
+
 <div class="modal fade" id="addBlogModal">
     <div class="modal-dialog">
         <div class="modal-content message_align">
@@ -118,7 +118,7 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span>×</span></button>
             </div>
             <div class="modal-body">
-                <form action="/addblog" method="post" >
+                <form action="" method="post" >
                 <fieldset class="form-group">
                     <label for="addBlogName">blog名称</label>
                     <input name="name" class="form-control" id="addBlogName" required >
@@ -128,33 +128,18 @@
                     <input name="content"  class="form-control" id="addcontent" required>
                 </fieldset>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
-                <button type="submit" class="btn btn-danger " data-dismiss="modal">确定</button>
+                <button type="button" class="btn btn-danger btn-addblog" data-dismiss="modal">确定</button>
              </form>
             </div >
 
         </div>
     </div>
   </div>
--->
 
 
-<!--
-<div class="container">
 
-        <form action="/addblog" method="post" >
-                <fieldset class="form-group">
-                    <label for="addBlogName">blog名称</label>
-                    <input name="name" class="form-control" id="addBlogName" required >
-                </fieldset>
-                <fieldset class="form-group" >
-                    <label for="addcontent">blog内容</label>
-                    <input name="content"  class="form-control" id="addcontent" required>
-                </fieldset>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
-                <button type="submit" class="btn btn-danger" data-dismiss="modal">确定</button>
-             </form>
-    </div>
--->
+
+
 
 
 <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
@@ -175,34 +160,35 @@
        $(".modal-btn-del").click(function () {
                 window.location.href=$.trim($("#url").val());
             });
+       $(".btn-add").click(function () {
 
+           $('#addBlogModal').modal("show");
+           $(".btn-addblog").on("click", function () {
+                    $.ajax({
+                        type: "POST",
+                        url: "/addblog",
+                        data: {name:$('#addBlogName').val(),content:$('#addcontent').val()},
+                        async: false,
+                        success: function (result) {
+                            alert(result);
+                            window.location.href="/table";
+                        },
+                        error: function () {
+                            alert('error');
 
+                        }
+                    })
 
-       <!--
-        $(".btn-update").click(function () {
-                var $blogId = $(this).parentsUntil("td").siblings(".bid").html();
-                $('#bId').val($blogId);
             });
-
-
-           $(".btn-update").click(function () {
-                var $blogId = $(this).parentsUntil("td").siblings(".bid").html();
-                $('#url').val("/updatetest?id=" +$blogId);
-                window.location.href=$.trim($("#url").val());
-            });
-
-          $(".btn-add").click(function () {
-                $('#addBlogModal').modal("show");
-            });
-        -->
+       });
 
 
 
-<!--
 
 
 
- -->
+
+
 
 
 

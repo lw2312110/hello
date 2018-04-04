@@ -35,14 +35,14 @@ def delblog():
 
 @hello_page.route('/addblog', methods=['GET', 'POST'])
 def addblog():
-    name=request.form.get('name')
-    content=request.form.get('content')
-    blogService().addblog(name,content)
-    return render_template('table.html',datas=blog.objects)
-
-@hello_page.route('/addtest', methods=['GET', 'POST'])
-def addblogtest():
-    return render_template('addblog.html')
+    try:
+        name=request.form.get('name')
+        content=request.form.get('content')
+        blogService().addblog(name,content)
+        return "添加博客成功"
+        #return render_template('table.html',datas=blog.objects)
+    except Exception,e:
+        return "添加博客出错"
 
 
 @hello_page.route('/updatetest', methods=['GET', 'POST'])
@@ -63,7 +63,6 @@ def updateblog():
         content=request.form.get("content")
         blogService().updateblog(blogid,name,content)
         return '添加博客成功'
-
     except Exception, e:
         return "更新博客出错updateblog"
     #return render_template('table.html', datas=blog.objects)
